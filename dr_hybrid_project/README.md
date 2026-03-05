@@ -35,7 +35,7 @@ Follow these steps to set up the project on your local machine:
 ### 2. Clone and Environment Setup
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_GITHUB_USERNAME/dr_hybrid_project.git
+git clone https://github.com/Nihar0001/dr_hybrid_project.git
 cd dr_hybrid_project
 
 # Create a virtual environment
@@ -78,13 +78,19 @@ Access the system at: `http://127.0.0.1:5001`
 
 ---
 
-### 2. Verify Data and Models
-> [!IMPORTANT]
-> The model files (`.pkl`) are too large for GitHub (>2GB). You must download them separately from your private storage (Google Drive/Dropbox) and place them in the `models/` directory before running.
+### 🚨 Important: Manual Model Setup
+> [!CAUTION]
+> **The Model Files are MISSING from this repository.** 
+> Because the `votingclassifier_model.pkl` is **2.6GB**, it exceeds GitHub's file size limit (100MB).
+
+**To make the project run, you must:**
+1. Download the `models/` folder manually from this [Google Drive Link](https://drive.google.com/drive/folders/1ObEF3nNfyCsRqXyNYNNnEfshAwr2dgi6?usp=sharing).
+2. Place the `.pkl` files inside the `models/` directory of your local clone.
 
 ```bash
-# Place models here:
-# dr_hybrid_project/models/votingclassifier_model.pkl
+# Required files:
+# models/votingclassifier_model.pkl (2.6GB)
+# models/scaler.pkl
 ```
 
 ## 🤝 For Team Members
