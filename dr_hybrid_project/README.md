@@ -80,7 +80,7 @@ Access the system at: `http://127.0.0.1:5001`
 
 ### 2. Verify Data and Models
 > [!IMPORTANT]
-> The model files (`.pkl`) are too large for GitHub (>2GB). You must download them separately from [YOUR_LINK_HERE] and place them in the `models/` directory before running.
+> The model files (`.pkl`) are too large for GitHub (>2GB). You must download them separately from your private storage (Google Drive/Dropbox) and place them in the `models/` directory before running.
 
 ```bash
 # Place models here:
