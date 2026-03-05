@@ -1,0 +1,26 @@
+# Environment
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+
+# Project specific
+uploads/*
+!uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
+data/*
+!data/*.csv
+!data/.gitkeep
+
+# Large models
+models/*.pkl
+models/*.h5
+models/vgg16_weights*
+
+# OS files
+.DS_Store
+Thumbs.db

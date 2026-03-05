@@ -1,0 +1,13 @@
+numpy
+pandas
+scikit-learn
+imblearn
+opencv-python
+matplotlib
+seaborn
+tensorflow>=2.12
+keras
+joblib
+scikit-image
+flask
+werkzeug

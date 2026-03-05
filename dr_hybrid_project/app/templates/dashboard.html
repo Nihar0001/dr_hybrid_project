@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics Dashboard - Medical Diagnostic System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Navigation Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-text">RETINA<span class="logo-accent">SCAN</span></div>
+      </div>
+      <nav class="sidebar-menu">
+        <div class="menu-category">General</div>
+        <a href="{{ url_for('dashboard') }}" class="menu-item active">
+          <i class="fas fa-th-large"></i> <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('scanner') }}" class="menu-item">
+          <i class="fas fa-microscope"></i> <span>Diagnostic View</span>
+        </a>
+
+        <div class="menu-category">Findings</div>
+        <a href="#" class="menu-item">
+          <i class="fas fa-disease"></i> <span>Diabetic Retinopathy</span>
+          <span
+            style="margin-left: auto; font-size: 0.6rem; color: var(--accent-green); background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px;">ACTIVE</span>
+        </a>
+        <a href="#" class="menu-item" style="opacity: 0.4;">
+          <i class="fas fa-eye"></i> <span>Glaucoma</span>
+          <span style="margin-left: auto; font-size: 0.6rem; color: var(--text-secondary);">OFFLINE</span>
+        </a>
+        <a href="#" class="menu-item" style="opacity: 0.4;">
+          <i class="fas fa-vial"></i> <span>Macular Degeneration</span>
+          <span style="margin-left: auto; font-size: 0.6rem; color: var(--text-secondary);">OFFLINE</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <header class="top-bar">
+        <div class="breadcrumb text-muted" style="font-size: 0.75rem;">
+          SYSTEM / ANALYTICS / ENSEMBLE_V1.4
+        </div>
+        <div class="user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div style="text-align: right;">
+            <div style="font-size: 0.8rem; font-weight: 600;">Dr. Thomas Wisman</div>
+            <div style="font-size: 0.65rem; color: var(--text-secondary);">CLINICAL RADIOLOGY</div>
+          </div>
+          <div class="user-avatar"
+            style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: #fff;">
+            TW
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-view">
+        <!-- Education Cards -->
+        <div class="stat-grid">
+          <div class="clinical-card" style="grid-column: span 2; display: flex; gap: 20px; align-items: center;">
+            <div style="font-size: 2.5rem; color: var(--accent-blue); opacity: 0.8;"><i
+                class="fas fa-notes-medical"></i></div>
+            <div>
+              <div class="card-label">Medical Reference: Diabetic Retinopathy</div>
+              <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px;">
+                Vessel segmentation analysis categorized across 5 severity levels:
+                <strong class="text-success">Class 0</strong>,
+                <strong>Class 1</strong>,
+                <strong>Class 2</strong>,
+                <strong class="text-danger">Class 3</strong>,
+                <strong class="text-danger">Class 4</strong>.
+              </p>
+            </div>
+          </div>
+          <div class="clinical-card" style="display: flex; flex-direction: column; justify-content: center;">
+            <div class="card-label">Hybrid Feature Fusion</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 5px 0;">32,818 <span
+                style="font-weight: 300; font-size: 0.75rem; color: var(--text-secondary);">VECTORS</span></div>
+            <p class="text-muted" style="font-size: 0.65rem;">Combined CNN Shape + GLCM Texture + LBP Pattern.</p>
+          </div>
+        </div>
+
+        <div class="stat-grid" style="align-items: stretch;">
+          <!-- Accuracy Chart -->
+          <div class="chart-container">
+            <div class="chart-title"><i class="fas fa-chart-bar" style="color: var(--accent-blue);"></i> Accuracy
+              Benchmarking</div>
+            <div class="chart-img-wrapper">
+              {% if cm_url %}
+              <img src="{{ cm_url }}" alt="Model Accuracy Bar Chart">
+              {% else %}
+              <div class="text-muted" style="font-size: 0.75rem;">Awaiting Model Metadata...</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- confusion Matrix -->
+          <div class="chart-container">
+            <div class="chart-title"><i class="fas fa-border-all" style="color: var(--accent-blue);"></i> Error Matrix
+            </div>
+            <div class="chart-img-wrapper">
+              {% if f1_url %}
+              <img src="{{ f1_url }}" alt="Normalized Confusion Matrix">
+              {% else %}
+              <div class="text-muted" style="font-size: 0.75rem;">Awaiting Model Metadata...</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Radar Chart -->
+          <div class="chart-container">
+            <div class="chart-title"><i class="fas fa-spider" style="color: var(--accent-blue);"></i> Distribution
+              Profile</div>
+            <div class="chart-img-wrapper">
+              {% if radar_url %}
+              <img src="{{ radar_url }}" alt="Model Radar Chart"
+                style="background: #fff; padding: 10px; border-radius: 4px;">
+              {% else %}
+              <div class="text-muted" style="font-size: 0.75rem;">Awaiting Model Metadata...</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem; padding-bottom: 2rem;">
+          <button class="btn-clinical"
+            style="width: auto; padding: 0.7rem 2.5rem; display: flex; align-items: center; gap: 10px;"
+            onclick="window.location.href='{{ url_for('scanner') }}';">
+            <i class="fas fa-microscope"></i> INITIALIZE DIAGNOSTIC SEQUENCE
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+
+</html>
