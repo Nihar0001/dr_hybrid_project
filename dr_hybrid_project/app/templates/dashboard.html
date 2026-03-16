@@ -1,135 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analytics Dashboard - Medical Diagnostic System</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RetinaScan AI - Analytics Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#1713ec',
+            clinical: {
+              light: '#f8f7ff',
+              soft: '#eeebff',
+              lavender: '#e0d7ff',
+              mauve: '#f3e8ff'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          borderRadius: {
+            'eight': '8px',
+          }
+        }
+      }
+    }
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #f8f7ff 0%, #f3e8ff 50%, #e0d7ff 100%);
+      min-height: 100vh;
+    }
+    nav a.active {
+      color: #1713ec;
+      font-weight: 600;
+    }
+</style>
 </head>
+<body class="font-sans text-slate-800 gradient-bg">
 
-<body>
-  <div class="app-container">
-    <!-- Navigation Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo-text">RETINA<span class="logo-accent">SCAN</span></div>
-      </div>
-      <nav class="sidebar-menu">
-        <div class="menu-category">General</div>
-        <a href="{{ url_for('dashboard') }}" class="menu-item active">
-          <i class="fas fa-th-large"></i> <span>Dashboard</span>
-        </a>
-        <a href="{{ url_for('scanner') }}" class="menu-item">
-          <i class="fas fa-microscope"></i> <span>Diagnostic View</span>
-        </a>
-
-        <div class="menu-category">Findings</div>
-        <a href="#" class="menu-item">
-          <i class="fas fa-disease"></i> <span>Diabetic Retinopathy</span>
-          <span
-            style="margin-left: auto; font-size: 0.6rem; color: var(--accent-green); background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px;">ACTIVE</span>
-        </a>
-        <a href="#" class="menu-item" style="opacity: 0.4;">
-          <i class="fas fa-eye"></i> <span>Glaucoma</span>
-          <span style="margin-left: auto; font-size: 0.6rem; color: var(--text-secondary);">OFFLINE</span>
-        </a>
-        <a href="#" class="menu-item" style="opacity: 0.4;">
-          <i class="fas fa-vial"></i> <span>Macular Degeneration</span>
-          <span style="margin-left: auto; font-size: 0.6rem; color: var(--text-secondary);">OFFLINE</span>
-        </a>
-      </nav>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="main-content">
-      <header class="top-bar">
-        <div class="breadcrumb text-muted" style="font-size: 0.75rem;">
-          SYSTEM / ANALYTICS / ENSEMBLE_V1.4
-        </div>
-        <!-- User info removed -->
-
-      </header>
-
-      <div class="dashboard-view">
-        <!-- Education Cards -->
-        <div class="stat-grid">
-          <div class="clinical-card" style="grid-column: span 2; display: flex; gap: 20px; align-items: center;">
-            <div style="font-size: 2.5rem; color: var(--accent-blue); opacity: 0.8;"><i
-                class="fas fa-notes-medical"></i></div>
-            <div>
-              <div class="card-label">Medical Reference: Diabetic Retinopathy</div>
-              <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px;">
-                Vessel segmentation analysis categorized across 5 severity levels:
-                <strong class="text-success">Class 0</strong>,
-                <strong>Class 1</strong>,
-                <strong>Class 2</strong>,
-                <strong class="text-danger">Class 3</strong>,
-                <strong class="text-danger">Class 4</strong>.
-              </p>
-            </div>
-          </div>
-          <div class="clinical-card" style="display: flex; flex-direction: column; justify-content: center;">
-            <div class="card-label">Hybrid Feature Fusion</div>
-            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 5px 0;">32,818 <span
-                style="font-weight: 300; font-size: 0.75rem; color: var(--text-secondary);">VECTORS</span></div>
-            <p class="text-muted" style="font-size: 0.65rem;">Combined CNN Shape + GLCM Texture + LBP Pattern.</p>
-          </div>
-        </div>
-
-        <div class="stat-grid" style="align-items: stretch;">
-          <!-- Accuracy Chart -->
-          <div class="chart-container">
-            <div class="chart-title"><i class="fas fa-chart-bar" style="color: var(--accent-blue);"></i> Accuracy
-              Benchmarking</div>
-            <div class="chart-img-wrapper">
-              {% if cm_url %}
-              <img src="{{ cm_url }}" alt="Model Accuracy Bar Chart">
-              {% else %}
-              <div class="text-muted" style="font-size: 0.75rem;">Awaiting Model Metadata...</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- confusion Matrix -->
-          <div class="chart-container">
-            <div class="chart-title"><i class="fas fa-border-all" style="color: var(--accent-blue);"></i> Error Matrix
-            </div>
-            <div class="chart-img-wrapper">
-              {% if f1_url %}
-              <img src="{{ f1_url }}" alt="Normalized Confusion Matrix">
-              {% else %}
-              <div class="text-muted" style="font-size: 0.75rem;">Awaiting Model Metadata...</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- Radar Chart -->
-          <div class="chart-container">
-            <div class="chart-title"><i class="fas fa-spider" style="color: var(--accent-blue);"></i> Distribution
-              Profile</div>
-            <div class="chart-img-wrapper">
-              {% if radar_url %}
-              <img src="{{ radar_url }}" alt="Model Radar Chart"
-                style="background: #fff; padding: 10px; border-radius: 4px;">
-              {% else %}
-              <div class="text-muted" style="font-size: 0.75rem;">Awaiting Model Metadata...</div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem; padding-bottom: 2rem;">
-          <button class="btn-clinical"
-            style="width: auto; padding: 0.7rem 2.5rem; display: flex; align-items: center; gap: 10px;"
-            onclick="window.location.href='{{ url_for('scanner') }}';">
-            <i class="fas fa-microscope"></i> INITIALIZE DIAGNOSTIC SEQUENCE
-          </button>
-        </div>
-      </div>
-    </main>
+<!-- Navigation -->
+<nav class="w-full z-50 p-6 flex items-center justify-between max-w-7xl mx-auto">
+  <div class="flex items-center space-x-2">
+    <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
+      <div class="w-4 h-4 bg-white rounded-full"></div>
+    </div>
+    <span class="text-xl font-bold tracking-tight text-slate-900">RetinaScan <span class="text-brand">AI</span></span>
   </div>
-</body>
+  <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+    <a href="{{ url_for('index') }}" class="hover:text-brand transition-colors">Home</a>
+    <a href="{{ url_for('dashboard') }}" class="hover:text-brand transition-colors active">Dashboard</a>
+    <a href="{{ url_for('scanner') }}" class="hover:text-brand transition-colors">Diagnostic View</a>
+  </div>
+  <div>
+     <a href="{{ url_for('scanner') }}" class="bg-brand text-white px-6 py-2.5 rounded-eight text-sm font-semibold hover:shadow-lg transition-all inline-block">New Scan</a>
+  </div>
+</nav>
 
+<header class="py-8 px-6 text-center">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">SYSTEM / ANALYTICS / ENSEMBLE_V1.4</div>
+    <h1 class="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4">Inside the Intelligence</h1>
+    <p class="text-lg text-slate-600 font-medium">Exploring the deep learning foundations and rigorous performance benchmarks of RetinaScan AI.</p>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 pb-24">
+  
+  <section class="mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="glass-card rounded-eight p-6 flex gap-4 items-center">
+         <div class="text-4xl text-brand"><i class="fas fa-notes-medical"></i></div>
+         <div>
+            <h3 class="font-bold text-slate-800">Medical Reference: Diabetic Retinopathy</h3>
+            <p class="text-slate-600 text-sm mt-1">Vessel segmentation analysis categorized across 5 severity levels: Class 0 to Class 4.</p>
+         </div>
+      </div>
+      <div class="glass-card rounded-eight p-6 flex flex-col justify-center">
+         <h3 class="font-bold text-slate-800">Hybrid Feature Fusion</h3>
+         <div class="text-2xl font-bold text-brand mt-2">32,818 VECTORS</div>
+         <p class="text-slate-500 text-xs mt-1">Combined CNN Shape + GLCM Texture + LBP Pattern.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mb-20">
+    <div class="flex items-center gap-4 mb-8">
+      <div class="h-8 w-1 bg-brand rounded-full"></div>
+      <h2 class="text-2xl font-bold text-slate-800">Performance Metrics</h2>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Accuracy Chart Container -->
+      <div class="glass-card rounded-eight p-6 flex flex-col items-center">
+        <h3 class="text-lg font-semibold mb-6 text-slate-700"><i class="fas fa-chart-bar text-brand"></i> Accuracy Benchmarking</h3>
+        <div class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2">
+          {% if cm_url %}
+            <img src="{{ cm_url }}" alt="Model Accuracy Bar Chart" class="w-full h-auto block">
+          {% else %}
+            <div class="text-slate-500 text-sm py-10 text-center">Awaiting Model Metadata...</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- confusion Matrix Chart Container -->
+      <div class="glass-card rounded-eight p-6 flex flex-col items-center">
+        <h3 class="text-lg font-semibold mb-6 text-slate-700"><i class="fas fa-border-all text-brand"></i> Error Matrix</h3>
+        <div class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2">
+          {% if f1_url %}
+            <img src="{{ f1_url }}" alt="Normalized Confusion Matrix" class="w-full h-auto block">
+          {% else %}
+            <div class="text-slate-500 text-sm py-10 text-center">Awaiting Model Metadata...</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Radar Chart Container -->
+      <div class="glass-card rounded-eight p-6 flex flex-col items-center">
+        <h3 class="text-lg font-semibold mb-6 text-slate-700"><i class="fas fa-spider text-brand"></i> Distribution Profile</h3>
+        <div class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2">
+          {% if radar_url %}
+            <img src="{{ radar_url }}" alt="Model Radar Chart" class="w-full h-auto block">
+          {% else %}
+            <div class="text-slate-500 text-sm py-10 text-center">Awaiting Model Metadata...</div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="flex justify-end">
+    <a href="{{ url_for('scanner') }}" class="bg-brand text-white px-8 py-4 rounded-eight font-bold shadow-lg hover:bg-brand/90 transition-all inline-block">
+      <i class="fas fa-microscope mr-2"></i> INITIALIZE DIAGNOSTIC SEQUENCE
+    </a>
+  </div>
+
+</main>
+</body>
 </html>

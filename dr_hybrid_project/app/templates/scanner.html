@@ -1,152 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Retinal Scan - Medical Diagnostic System</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-
-<body>
-  <div class="app-container">
-    <!-- Navigation Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo-text">RETINA<span class="logo-accent">SCAN</span></div>
-      </div>
-      <nav class="sidebar-menu">
-        <div class="menu-category">General</div>
-        <a href="{{ url_for('dashboard') }}" class="menu-item">
-          <i class="fas fa-th-large"></i> <span>Dashboard</span>
-        </a>
-        <a href="{{ url_for('scanner') }}" class="menu-item active">
-          <i class="fas fa-microscope"></i> <span>Diagnostic View</span>
-        </a>
-
-        <div class="menu-category">Findings</div>
-        <a href="#" class="menu-item">
-          <i class="fas fa-disease"></i> <span>Diabetic Retinopathy</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-eye"></i> <span>Glaucoma</span>
-        </a>
-        <a href="#" class="menu-item">
-          <i class="fas fa-vial"></i> <span>Macular Degeneration</span>
-        </a>
-      </nav>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="main-content">
-      <header class="top-bar">
-        <div class="breadcrumb text-muted" style="font-size: 0.75rem;">
-          SYSTEM / DIAGNOSTICS / SCAN_V2.1
-        </div>
-        <!-- User info removed -->
-
-      </header>
-
-      <div class="scanner-view">
-        <!-- Visualizer Area -->
-        <div class="viewport-container">
-          {% if overlay_url %}
-          <div class="scan-frame">
-            <div class="inner-brackets"></div>
-            <img src="{{ overlay_url }}" class="main-image" alt="Retinal Overlay">
-          </div>
-          <div
-            style="position: absolute; bottom: 30px; color: var(--accent-blue); font-size: 0.65rem; letter-spacing: 2px; font-weight: 700; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--accent-blue);">
-            <i class="fas fa-satellite-dish" style="margin-right: 8px;"></i> AI ASSISTED DIAGNOSIS : ACTIVE
-          </div>
-          {% else %}
-          <div class="upload-zone" id="drop-zone">
-            <form action="{{ url_for('scanner') }}" method="post" enctype="multipart/form-data" id="upload-form">
-              <input type="file" name="file" class="file-input" id="file-input" accept="image/*">
-              <div class="upload-icon"
-                style="font-size: 3.5rem; color: var(--border-color); margin-bottom: 1.5rem; transition: color 0.3s;">
-                <i class="fas fa-circle-notch fa-spin"
-                  style="position: absolute; font-size: 8rem; opacity: 0.05; z-index: 0;"></i>
-                <i class="fas fa-cloud-upload-alt" style="position: relative; z-index: 1;"></i>
-              </div>
-              <h3 style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--text-primary);">READY FOR SCAN</h3>
-              <p class="text-muted" style="font-size: 0.8rem;">Drag and drop retinal scan or click to browse</p>
-            </form>
-          </div>
-          {% endif %}
-        </div>
-
-        <!-- Result/Control Panel -->
-        <aside class="diag-panel">
-          <div class="clinical-card">
-            <div class="card-label">Diagnostic Result</div>
-            {% if pred_name %}
-            <div
-              class="diag-result {% if pred > 1 %}text-danger{% elif pred > 0 %}text-warning{% else %}text-success{% endif %}">
-              {{ pred_name }}
-            </div>
-            <p class="text-muted" style="font-size: 0.8rem; line-height: 1.6; margin-top: 1rem;">
-              {{ description }}
-            </p>
-            {% else %}
-            <div class="diag-result text-muted" style="font-size: 1.1rem; opacity: 0.5;">Awaiting Input...</div>
-            <p style="font-size: 0.75rem; color: #444; margin-top: 1rem;">Please upload a high-resolution fundus image
-              to begin diagnostic sequencing.</p>
-            {% endif %}
-          </div>
-
-          {% if pred_name %}
-          <div class="clinical-card">
-            <div class="card-label">Confidence Metrics</div>
-            <div
-              style="display: flex; align-items: center; gap: 12px; margin-top: 0.5rem; color: var(--accent-green); background: rgba(16, 185, 129, 0.05); padding: 10px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.1);">
-              <i class="fas fa-check-double"></i>
-              <span style="font-weight: 600; font-size: 0.8rem;">Verified by Hybrid Ensemble</span>
-            </div>
-          </div>
-          {% endif %}
-
-          <div class="clinical-card">
-            <div class="card-label">System Actions</div>
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 1rem;">
-              <button class="btn-clinical" onclick="window.location.href='{{ url_for('scanner') }}';">Reset
-                Sequence</button>
-              <button class="btn-clinical"
-                style="background:#222; border: 1px solid var(--border-color); color: var(--text-secondary);">Archive
-                Findings</button>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </main>
-  </div>
-
-  {% with messages = get_flashed_messages() %}
-  {% if messages %}
-  <div style="position: fixed; bottom: 20px; right: 20px; z-index: 100;">
-    {% for message in messages %}
-    <div
-      style="background: var(--accent-red); color: white; padding: 1rem 1.5rem; border-radius: 6px; margin-top: 10px; font-size: 0.8rem; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 4px solid #fff;">
-      <i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i> {{ message }}
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% endwith %}
-
-  <script>
-    const fileInput = document.getElementById('file-input');
-    const uploadForm = document.getElementById('upload-form');
-
-    if (fileInput) {
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-          uploadForm.submit();
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RetinaScan AI - Scanner Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#1713ec',
+            clinical: {
+              light: '#f8f7ff',
+              soft: '#eeebff',
+              lavender: '#e0d7ff',
+              mauve: '#f3e8ff'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          borderRadius: {
+            'eight': '8px',
+          }
         }
-      });
+      }
     }
-  </script>
-</body>
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #f8f7ff 0%, #f3e8ff 50%, #e0d7ff 100%);
+      min-height: 100vh;
+    }
+    nav a.active {
+      color: #1713ec;
+      font-weight: 600;
+    }
+</style>
+</head>
+<body class="font-sans text-slate-800 gradient-bg">
 
+<!-- Navigation -->
+<nav class="w-full z-50 p-6 flex items-center justify-between max-w-7xl mx-auto">
+  <div class="flex items-center space-x-2">
+    <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
+      <div class="w-4 h-4 bg-white rounded-full"></div>
+    </div>
+    <span class="text-xl font-bold tracking-tight text-slate-900">RetinaScan <span class="text-brand">AI</span></span>
+  </div>
+  <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+    <a href="{{ url_for('index') }}" class="hover:text-brand transition-colors">Home</a>
+    <a href="{{ url_for('dashboard') }}" class="hover:text-brand transition-colors">Dashboard</a>
+    <a href="{{ url_for('scanner') }}" class="hover:text-brand transition-colors active">Diagnostic View</a>
+  </div>
+  <div>
+     <a href="{{ url_for('scanner') }}" class="bg-brand text-white px-6 py-2.5 rounded-eight text-sm font-semibold hover:shadow-lg transition-all inline-block">New Scan</a>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 pb-24">
+    <header class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Diagnostic Sequence</h1>
+        <p class="text-slate-600 mt-2">Upload a retinal scan or use the camera to begin analysis.</p>
+    </header>
+
+    <!-- Flashed Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-6 max-w-3xl mx-auto">
+          {% for category, message in messages %}
+            <div class="p-4 rounded-md mb-2 text-sm font-medium {% if category == 'error' %}bg-red-100 text-red-700 border border-red-200{% else %}bg-green-100 text-green-700 border border-green-200{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        
+        <!-- Input Section -->
+        <div class="glass-card rounded-eight p-8 flex flex-col items-center">
+            <h2 class="text-xl font-semibold mb-6 text-slate-800"><i class="fas fa-camera text-brand mr-2"></i> Input Source</h2>
+            
+            <!-- File Upload -->
+            <form action="{{ url_for('scanner') }}" method="post" enctype="multipart/form-data" class="w-full h-full mb-8 flex-1 flex flex-col">
+                <div class="flex items-center justify-center w-full h-full flex-1">
+                    <label for="image-upload" class="flex flex-col items-center justify-center w-full h-full min-h-[400px] border-2 border-brand/30 border-dashed rounded-eight cursor-pointer bg-white/50 hover:bg-white transition-colors group">
+                        <div class="flex flex-col items-center justify-center p-12 text-center">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-brand/60 mb-3 group-hover:text-brand transition-colors"></i>
+                            <p class="mb-2 text-sm text-slate-600"><span class="font-semibold text-brand">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-slate-400">PNG, JPG or JPEG</p>
+                        </div>
+                        <input type="file" name="file" id="image-upload" accept="image/*" required class="hidden" onchange="this.form.submit()">
+                    </label>
+                </div>
+            </form>
+        </div>
+
+        <!-- Output Section -->
+        <div class="glass-card rounded-eight p-8 flex flex-col items-center justify-center min-h-[500px]">
+            <h2 class="text-xl font-semibold mb-6 text-slate-800 w-full text-center border-b border-slate-200/50 pb-4"><i class="fas fa-microscope text-brand mr-2"></i> Analysis Results</h2>
+            
+            {% if pred_name %}
+                <div class="w-full space-y-8 mt-4">
+                    <!-- Images Container -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Original Scan</span>
+                            <div class="w-full aspect-square bg-slate-100 rounded-xl overflow-hidden border-4 border-white shadow-sm flex items-center justify-center">
+                                <img src="{{ url_for('static', filename='uploads/' + uploaded_name) }}" alt="Original image" class="max-w-full max-h-full object-contain">
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Segmented</span>
+                            <div class="w-full aspect-square bg-slate-100 rounded-xl overflow-hidden border-4 border-white shadow-sm relative flex items-center justify-center">
+                                <div class="absolute inset-0 opacity-20 bg-brand/20 mix-blend-multiply pointer-events-none z-10"></div>
+                                <img src="{{ overlay_url }}" alt="Segmented image" class="max-w-full max-h-full object-contain">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prediction Result -->
+                    <div class="bg-white/80 rounded-eight p-8 border border-white shadow-sm text-center">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Diagnostic Output</h3>
+                        <div class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                            {{ pred_name }} <span class="text-sm font-medium text-slate-500">({{ confidence }}%)</span>
+                        </div>
+                        {% if 'Normal' in pred_name or 'Class 0' in pred_name %}
+                            <div class="inline-flex items-center gap-2 mt-4 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold border border-green-100">
+                                <i class="fas fa-check-circle"></i> No signs of DR detected
+                            </div>
+                        {% else %}
+                            <div class="inline-flex items-center gap-2 mt-4 bg-amber-50 text-amber-700 px-4 py-2 rounded-full text-sm font-semibold border border-amber-100">
+                                <i class="fas fa-exclamation-triangle"></i> Review Advised
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">{{ description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="flex flex-col items-center justify-center text-slate-400 h-full">
+                    <div class="w-24 h-24 rounded-full bg-white/50 flex items-center justify-center mb-6 shadow-inner">
+                        <i class="fas fa-eye text-4xl text-slate-300"></i>
+                    </div>
+                    <p class="font-medium text-center text-sm max-w-[250px] leading-relaxed">Awaiting input. Please upload a scan or capture an image to generate diagnostic results.</p>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+</main>
+
+</body>
 </html>
