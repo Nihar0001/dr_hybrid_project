@@ -54,6 +54,7 @@ def scanner():
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
                 "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
+                "original_url": url_for("uploads_file", filename=filename),
                 "uploaded_name": filename,
             })
         except Exception as e:
@@ -91,6 +92,11 @@ def dashboard():
 def outputs_file(filename):
     # Serve anything from outputs (images, txt)
     return send_from_directory(config.OUTPUTS_DIR, filename)
+
+@app.route("/uploads/<path:filename>")
+def uploads_file(filename):
+    # Serve the original uploaded image
+    return send_from_directory(config.UPLOADS_DIR, filename)
 
 
 if __name__ == "__main__":
