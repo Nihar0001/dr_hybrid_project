@@ -39,7 +39,7 @@ def scanner():
         f.save(save_path)
 
         try:
-            pred, proba, heatmap_path = infer_image(save_path)
+            pred, proba, heatmap_path, preprocessed_path = infer_image(save_path)
 
             # Calculate confidence as percentage of predicted class
             confidence = float(proba[pred]) * 100
@@ -54,7 +54,7 @@ def scanner():
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
                 "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
-                "original_url": url_for("uploads_file", filename=filename),
+                "original_url": url_for("outputs_file", filename=os.path.basename(preprocessed_path)),
                 "uploaded_name": filename,
             })
         except Exception as e:
