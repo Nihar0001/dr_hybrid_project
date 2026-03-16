@@ -64,6 +64,11 @@ def scanner():
 
 
 @app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/dashboard")
 def dashboard():
     # Show analysis artifacts if they exist
     cm = "model_accuracy_bar_chart.png"

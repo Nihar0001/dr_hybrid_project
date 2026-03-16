@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RetinaScan AI | Early Detection. Precise Care.</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            clinical: {
+              lavender: '#E9D5FF', // Soft lavender from reference image
+              mauve: '#C084FC',    // Mauve accent
+              glass: 'rgba(255, 255, 255, 0.7)',
+              deep: '#4C1D95',     // Deep purple for text
+              accent: '#1713ec',   // Custom theme color
+            }
+          },
+          borderRadius: {
+            'theme': '8px', // ROUND_EIGHT
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-animations">
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+    .glass-morphism {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .gradient-bg {
+      background: radial-gradient(circle at top right, #fdf4ff, #ffffff, #f5f3ff);
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-900 gradient-bg selection:bg-clinical-mauve/30">
+<!-- BEGIN: Navigation -->
+<nav class="fixed top-0 w-full z-50 glass-morphism border-b border-clinical-lavender/30">
+<div class="max-container mx-auto px-6 h-20 flex items-center justify-between max-w-7xl">
+<div class="flex items-center space-x-2">
+<div class="w-8 h-8 bg-clinical-accent rounded-full flex items-center justify-center">
+<div class="w-4 h-4 bg-white rounded-full"></div>
+</div>
+<span class="text-xl font-bold tracking-tight text-clinical-deep">RetinaScan <span class="text-clinical-accent">AI</span></span>
+</div>
+<div class="hidden md:flex space-x-8 text-sm font-medium">
+<a class="hover:text-clinical-accent transition-colors" href="#problem">The Challenge</a>
+<a class="hover:text-clinical-accent transition-colors" href="#solution">Technology</a>
+<a class="hover:text-clinical-accent transition-colors" href="#clinical">Clinical Data</a>
+</div>
+<div>
+<button class="bg-clinical-accent text-white px-6 py-2.5 rounded-theme text-sm font-semibold hover:shadow-lg hover:shadow-clinical-accent/20 transition-all">
+          Request Demo
+        </button>
+</div>
+</div>
+</nav>
+<!-- END: Navigation -->
+<!-- BEGIN: Hero Section -->
+<section class="relative pt-32 pb-20 overflow-hidden min-h-screen flex items-center">
+<!-- Decorative Elements -->
+<div class="absolute top-40 right-[-10%] w-96 h-96 bg-clinical-lavender rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
+<div class="absolute bottom-20 left-[-5%] w-72 h-72 bg-clinical-mauve rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style="animation-delay: 2s;"></div>
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+<div data-purpose="hero-content">
+<span class="inline-block py-1 px-4 rounded-full bg-clinical-lavender/50 text-clinical-deep text-xs font-bold tracking-widest uppercase mb-6">
+          Next-Generation Screening
+        </span>
+<h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 leading-tight mb-6">
+          Early Detection.<br/>
+<span class="text-clinical-accent">Precise Care.</span><br/>
+          Powered by AI.
+        </h1>
+<p class="text-lg text-slate-600 mb-10 max-w-lg leading-relaxed">
+          Revolutionizing diabetic retinopathy screening with state-of-the-art neural networks. Reduce human error and provide results in real-time.
+        </p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="bg-slate-900 text-white px-8 py-4 rounded-theme font-bold hover:bg-slate-800 transition-all text-center">
+            Request a Demo
+          </button>
+<button class="glass-morphism border border-slate-200 text-slate-900 px-8 py-4 rounded-theme font-bold hover:bg-white transition-all text-center">
+            View Clinical Data
+          </button>
+</div>
+</div>
+<div class="relative" data-purpose="hero-visual">
+<!-- Abstract AI representation using the provided palette image as a base for a decorative frame -->
+<div class="relative z-10 glass-morphism p-4 rounded-2xl shadow-2xl border border-white/50">
+<img alt="Color Palette Visualization" class="w-full h-auto rounded-lg opacity-80" data-purpose="abstract-visual" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAj0AAADKCAYAAABOmfGJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAABkESURBVHhe7d1/jFPnne/xz7E9/jFj4wAJzDADTNIJUEoCaShFTdKELZsbqW3uJbooXXWj0lVEsmrpUokoabW9SbpSfmy4KlV2twmKtkhpta3YC1Lo1UVZWsgPopsJucANiQilBMjADIQJ9YxnxvbYPvsHoSlPfMYebM8c53m//vw+FnxtH5/zOc95zhnHdV1XAAAAn3IBswAAAPBpROgBAABWIPQAAAArEHoAAIAVCD0AAMAKhB4AAGAFQg8AALACoQcAAFiB0AMAAKxA6AEAAFYg9AAAACsQegAAgBUIPQAAwAqEHgAAYAVCDwAAsAKhBwAAWIHQAwAArEDoAQAAViD0AAAAKxB6AACAFQg9AADACoQeAABgBUIPAACwAqEHAABYwXFd1zWLNeVKw/2jyqYKGh0qKp8pqlio7X8ZCDoKRQNqagkokgyqeXqT5Jivql6hUND2bdu1e/ceHTiwX8ePn9Dg4KD5sqolEgl1ds7VkiU3aMWK27TqrlUKBoPmy6rnSrlUQfl0UYURV4VcUW7BfFF1nKAUDAcUjDkKxQMKJ4N1+W6KxaJ27dqlfd37dPjwYZ0+fVpDQ0Pmy6rW0tKiWbNmacGCBVq6bKlWrlypQKAO5w6ulE9lVEznVBjJy83l5db4dzPRnKAjJxxSMBZSIB5WKBmty7YgV8qcTSn3x2HlBzPKZ3Jy80XzVVVzQgGFomGFElGFr2hWdEayLu+nWCxq94sva9/rB3TknaPqPdWnoaFh82VVaWlpVlt7q+Yt7NLSLy7Ritu/XJft2nVd9R3q1Yfv9WugN6WR88PKZ/Pmy6oWioQUm9qsKW1JTbt6uloXtclxav/luEVXRw4e1ftHT+lszwdKfTigXCZnvqwq4WhYyWlTNKPjKs3uate8xV1yArV/L4VCQb/ZvlOv7nlNb+1/WydP9Cg9mDZfVrV4Iq45czt03Q2f0823fUlfW3VHfY5vHuoWetyiNHgqq3TfqIr5uvwXngIhR/HWJiXaI3Jq8LvNZDLa+NRGPfvsZqVSKXO47pLJpO67b602PLBB0WjUHB4/Vxo5k1e2P1/zkFOOE5Qi00OKzQzV5ACRy+W05edbtHXr1rr8QMuJJ+JavXq11nx7jcLhsDk8fq6UO5NWvn+44UNOOU7QUWh6s8Iz4zXZFlR0lT5xTsOnzsvNT/CGLckJBdXcPlXxuVdKNTgo5XI5Pf/cr7XtVy8oPVj7AD+WeKJFd33jTt1z79012a6L+aKOvXJUJ7tPKJ8ZNYfrLhRt0pxlc3XNLV0KhKo/KBTyBXX/9k0d3HtI2ZGsOVxXkVhEi29apGVfuVHBUPVhIZvJ6umNz2jL5l9qIDVgDtfdlOQUrVn7Ta3bcL8i0Yg5XHN1CT0jH+aVOp5VPlv7s6vxCEUCSnZGFJsWMocqtmPHDj344EPqeb/HHJpwHbM79OSTT+jrX/+6OVSx0VRRw72jKuZq/rWPSyDsqLmtSU3Jy98BvbTnJW36ySb19fWZQxOutbVV67+/Xrfedqs5VLFCKqtc76CKuYk/YE+mQDiocFtCweTl7/Cy5wY1ePSMCpNwQDUFo01KdM1U5MqEOVSxV373mp5+arPO9J01hybUzNYZWvfAWt3yF18yhyp29vAZvbvzHY2kRsyhCRdLxjT/joWasWCmOVSxPxx6Ty+9sFeD52s/yz8eiakJ3XrnTfrMoqvNoYrt3PEfevShx3Sqp9ccmnDtHW16+Ikf6o6v/6U5VFPBRx555BGzWI3B0zmd/0Om5pewLkex4GqkPy8n6CiSGH8i3rRpk9Z993saGJj49FvKwMCAtv2vbYo1x7R8+XJzuKzMB3kN94xO+OxOKW7hwqU1JyCFWsYffH7x/C/0+GOPK52e+NmdUtLptHbt2qVoNKrrF19vDpc1+sGQsj0Dn/rZnVLcgqt8KiMn4CjYMv5ZhaGT/Rp4t7cul7Auh5svKnN2QE4goHCy2Rwu69+2/Lv+8cc/1VB6Ymd3ShlKD+l3L76saDSi65YsNIfLOr73mN7e8VZdLmFdjnw2r763exVsCuqKOVPN4bLe3LNfu7buqfklrMuRy+R05OBRNYVDmtXZZg6X9bNNz+nB7/1IgwP+2IcODqS1Y9v/UTQW1ReWf94crpmahp7B0zmlTkzsVF8lsqnCuIPPpk2b9D9+9LBZ9oXdu/eMO/hkPshrpNcfO54/l08Xxx18fvH8L/TP//TPZtkX3uh+Y9zBZ/SDIeV6/bHjmUyFdG7cwWfoZL/SxyZ3NsRL7vzQuIPPv235dz3z0381y5Nu3+v7xx18ju89piO7DptlX+g/dm7cwefNPfv16v/+v2Z50p38fc+4g8/PNj2nxx/eaJZ94dU9r9U1+NQs9Ix8mNf5P2TMsm9kUwU1tQTVFCt/cN2xY4fWffd7ZtlXdu/eo0XXLdL8+fPNoU8YTRU13DP50/5e8umiQtGAgtHy6yBe2vOSHn/scbPsK290v6Frr71WnZ2d5tAnFFJZZXv8MZPoB4V0TsFokwLR8peks+cGNfDu5E/LjyV3fkhN8ahCzeUv3b3yu9f0jz/+qVn2jX2v71fXvKs19+rZ5tAnnD18Rm/veMss+0r/sXNKtE5Ry5Vxc+gT/nDoPe3auscs+8bJ3/foqllXatqM8iFu547/0IPf+5FZ9pVX97ymzy6ar675nzGHqlY+AVTALUqp4/6b4TGljmfllpkBz2QyevDBh8yyLz344EPKZMoETVca7vVv4LlouHdUKnNlJ5fLadNPNpllX9r0k03K5cpMgbtSrndy1wX4Ua53sOy2oKKrwaNnzKovDR49IxXHfkO5XE5PP7XZLPvO009tLrtdF/NFvbvzHbPsS+/ufEfFMpdFC/mCXnphr1n2nZde2KtCmQX82UxWjz70mFn2pUcfekzZTO1zRU1Cz+CpyV+0XIl8tqjBU2N/iBuf2uiLRcuV6Hm/RxufGnuKcuRMftIXLVeimHM1cmbsy29bfr7FF4uWK9HX16ctP99ili+RO5O2btFyJYq5gnJnxr7clz5xzheLlitRyIwqfeKcWb7E88/9etIXLVfiTN9ZPf/cr83yJY69ctQXi5YrMZIa0bFXjprlS3T/9s1JX7RcicHzg+r+7Ztm+RJPb3zGF4uWK3Gqp1dPb3zGLFet+tDjSum+xtj5SB/16pEBCoWCnn3W/2dbf+7ZZzerUPA4cLpStn/sIOEn2f6853dTLBa1detWs+xrW7duVbHocTLgSvn+2j5r5dMk3z/suS3IlYZPnTervjZ86rzn+ykWi9r2qxfMsm9t+9ULntu167o62X3CLPvaye4T8rqJ2S26Orj3kFn2rYN7D8n1mFUsFArasvmXZtnXtmz+pffx7TJVHXqG+yf+OTzVKOZdDfeXDmnbt22flOfwVCOVSmn7tu1mWdKFu6P8cKdWpS7e0VXKrl27JuU5PNVID164o6uUfCpj5Z1albp4R1cpmbOpSXkOTzXcfEGZs6X3LbtffHnCn8NTjfTgkHa/+LJZliT1HeqdlOfwVCOfGVXfodKzH0cOHp3w5/BUIzuS1ZGDpWeufrN956Q8h6caA6kB/Wb7TrNclapDT9bjIOVnXj3v3u3fhWpj8eo7ny59NuZnXj3v695nlhqCV9/F9NjrIuD9GeX+2JgzZF5973v9gFnyPa+eP3yv3yw1BK++3z96yiz5nlfPr+55zSw1hFr3XXXoGR0qfZDyM6+eDxzYb5YaglffhZHGm0nw6vnwYX/e+lqOV9+Fkca57DhZvD6j/GDpGSC/8+r7yDulz8z9zKvngd7Ss1l+59X32Z4PzJLvefX81v63zVJDqHXfVYeefKZ0gPAzr56PH2+sa9EXefVdyJV+n37m1fPp06fNUkPw6tvNlT6g42Nen1HeBw+GuxxeffeeaozF+X/Oq+eR86Vns/zOq+/Uh411OUhj9HzyRGPcoGOqdd9Vhx4/PHl5vLx6rscfD50IXn030nqei7x6rscfD50IXn2znqc8r8/IL09eHi+vvmv9x0MnglfPfnny8nh59e2HJy+Pl1fPjbYm8qJa91116AEAAGgEhB4AAGAFQg8AALACoQcAAFiB0AMAAKxA6AEAAFYg9AAAACsQegAAgBUIPQAAwAqEHgAAYAVCDwAAsAKhBwAAWIHQAwAArEDoAQAAViD0AAAAKxB6AACAFQg9AADACoQeAABgBUIPAACwAqEHAABYgdADAACsQOgBAABWIPQAAAArEHoAAIAVCD0AAMAKhB4AAGAFQg8AALACoQcAAFiB0AMAAKxA6AEAAFYg9AAAACsQegAAgBUIPQAAwAqEHgAAYAVCDwAAsAKhBwAAWIHQAwAArEDoAQAAViD0AAAAKxB6AACAFQg9AADACoQeAABgBUIPAACwAqEHAABYgdADAACsQOgBAABWIPQAAAArEHoAAIAVCD0AAMAKhB4AAGAFQg8AALACoQcAAFiB0AMAAKxA6AEAAFYg9AAAACsQegAAgBUIPQAAwAqEHgAAYAVCDwAAsAKhBwAAWIHQAwAArEDoAQAAViD0AAAAKxB6AACAFQg9AADACoQeAABgBUIPAACwAqEHAABYgdADAACsQOgBAABWIPQAAAArEHoAAIAVCD0AAMAKhB4AAGAFQg8AALACoQcAAFiB0AMAAKxA6AEAAFYg9AAAACsQegAAgBUIPQAAwAqEHgAAYAVCDwAAsAKhBwAAWIHQAwAArEDoAQAAViD0AAAAKxB6AACAFQg9AADACoQeAABgBUIPAACwAqEHAABYgdADAACsQOgBAABWIPQAAAArEHoAAIAVCD0AAMAKhB4AAGAFQg8AALACoQcAAFiB0AMAAKxA6AEAAFYg9AAAACsQegAAgBUIPQAAwAqEHgAAYAVCDwAAsAKhBwAAWIHQAwAArEDoAQAAViD0AAAAKxB6AACAFQg9AADACoQeAABgBUIPAACwAqEHAABYgdADAACsQOgBAABWIPQAAAArEHoAAIAVCD0AAMAKhB4AAGAFQg8AALACoQcAAFiB0AMAAKxA6AEAAFYg9AAAACsQegAAgBUIPQAAwAqEHgAAYAVCDwAAsAKhBwAAWIHQAwAArFB16AkEHbPke149JxIJs9QQvPp2gmbF/7x6bmlpMUsNwatvx2MbxMe8PiMnVPVua1J49d3S0myWfM+r51AkZJYaglff4WjYLPmeV8/xRNwsNYRa9136VzgOoWjV/8SE8+q5s3OuWWoIXn0Hw6Xfp5959Txr1iyz1BC8+nbCpXey+JjXZxTy2Kn7nVffbe2tZsn3vHqOTS0dhvzOq+/ktClmyfe8ep4zt8MsNYRa9136CDMOTS1V/xMTzqvnJUtuMEsNwavvYKz0mbKfefW8YMECs9QQvPoOxkof0PExr88olIiapYbg1fe8hV1myfe8ep7SljRLDcGr7xkdV5kl3/Pq+bobPmeWGkKt+y599B+HSNLjeoSPefW8YsVtZqkhePUdilf99U44r56XLltqlhqCV9+BeOmzfnzM6zMKX1H6rNzvvPpe+sUlZsn3vHqedvV0s9QQvPqe3dVulnzPq+ebb/uSWWoIte679BFmHJqnNykQKn127keBkKPm6U1mWZK06q5VSiZLJ36/SiaTWnXXKrMsSQong55rZPzICV7ouZSVK1fW/NpuvcUTca1cudIsS5JCyajnmhVcWM8TSpaeGYnOSMoJld5O/MoJBRWdUXrfsuL2LyueKL32y4/iiRatuP3LZlmS1LqoTaFo6f2rX4WiTWpd1GaWJUnzFncpEouYZd+KxCKat7j0LNzXVt2hKcnSl778akpyir626g6zXJWqQ48cKd7aOBt5vLVJ8jjWBINB3XffWrPsa/fdt1bBoMcBwJEi00tfIvCjyPSQ53cTCAS0evVqs+xrq1evViDg8RNzpND00mf++Oiz8dgW5EjN7VPNqq81t0/1fD+BQEB3feNOs+xbd33jTs/t2nEczVlWeo2hX81ZNleOU/rLcQKOFt+0yCz71uKbFskJlH4vwWBQa9Z+0yz72pq13/Q+vl2m0lvuOCXaIwpFavJP1VUoElCifezUvuGBDeqYXduFU/XSMbtDGx7YYJYvEZsZUiBc+kfgJ4Gwo9jMsQPamm+vUWtr6QWUftPa2qo1315jli8RnhlXIFzbH/SnQSAcVHjm2LN68blXKtggMwrBaJPic680y5e45967NbN1hln2nZmtM3TPvXeb5Utcc0uXYsmYWfalWDKma24pPTNy0bKv3KjE1NJ3yPpJYmpCy75yo1m+xLoN96u9o/Sslt+0d7Rp3Yb7zXLVapJUnICU7Bw7TPhBsjMip8w7jkajevLJJ8yyLz355BOKRktfAvgTR2pu8//BobnNewbuonA4rPXfX2+WfWn999crHC69JuVPHCnc5v+d6UQLtyXKbgsKOEp0zTSrvpTomil5nH1fFA6Hte4B/88yr3tgbdntOhAKaP4dC82yL82/Y6ECHo8SuCgYCurWO28yy75z6503KVjmsm8kGtHDT/zQLPvSw0/8UJFo7XNF8JFHHnnELF6OplhATtBRNlUwh3whOTeilhmVHfznz5+vWHNMu3fvMYd848f/8Ki+9a1vmeWSglFHTkDKp4vmkC/E2kKKTBv7x3pRZ2enotGo3uh+wxzyje989zu6879WdrkiEA3JCTgqpHPmkJXCbXGFplU2SxBqjsgJBJQ7P2QO+Ub8mhmKtV1hlkuae/VsRaMR7Xt9vznkC/f/3d/oq6v+i1kuqeXKuIJNQfUfO2cO+ca8lQvU/vnZZrmkaTOmqikc0snf95hDvnDzV5frc8s+a5ZL6pr/GUVjUb265zVzyDd+8OgG/dW36rOcoWahR5IiiaAvg09ybkSJWWOfnZiWL1/u2+Dz4394VOvXj2/GI9QS8GXwibWFFL1q7MtapusXX+/b4POd735Hf33PX5vlMQVbwgSfjwJP01XjW9AbTjb7NvjEr5mhljml7wryct2Shb4MPvf/3d/or9b8d7M8pivmTPVt8Jm3coE6b7rGLI9pVmebL4PPzV9drhtvK/3YEi9fWP553wafHzy6QX+7/l6zXDM1DT36KPg0tQQ1mi6qWHDN4QkVigQ0tSta8QyPafny5Vp03SJ1d3drYGDAHJ5wHbM79LNn/qXiGR5TqCWgUDSg/EhR7iTn0kDYUUtHuOIZHtP1i6/Xtddeq0OHDimdTpvDE661tVV//6O/r3iGxxRsCSsYbVJxZFTuJP9uJlogHFSkI1nxDI8pnGxWUzyq0YERufnJD/XBaJOSC2ZVPMNjum7JQnXNu1pv///DGkpPbpib2TpDP3j0+xXP8JiumDNVidYpSvX8Ufls3hyecLFkTIv+2+KKZ3hMszrbdNWsK9V78oxymck9SUlMTej2u/+i4hke0xeWf16fXTRf/6/7gAYHJn8f2t7Rpv/5L4/XbYbnIsd13brsYd2iNHgqq3TfqIr5uvwXngIhR/HWJiXay6/hqUQmk9HGpzbq2Wc3K5VKmcN1l0wmdd99a7XhgQ3l1/BUwpVGzuSV7c9PePhxghfu0orN9L5TazxyuZy2/HyLtm7dqvTgxP9w44m4Vq9erTXfXlN2rUNFXCl3Jq18//CnPvw4QUeh6c0XFi3XYFtQ0VX6xDkNnzovNz/BG/ZHt6U3t0+9sGi5zBqeSuRyOT3/3K+17VcvKD04seEnnmjRXd+4U/fce3dNtutivqhjrxzVye4TymdGzeG6C0WbNGfZXF1zS1fZNTyVKOQL6v7tmzq495CyI1lzuK4isYgW37RIy75yY9k1PJXIZrJ6euMz2rL5lxpITfzJ/ZTkFK1Z+02t23B/XdbwmOoWev7ElYb7R5VNFTQ6VFQ+U/sZoEDQUSgaUFNLQJFk8MJzeKrf53xCoVDQ9m3btXv3Hh04sF/Hj5/Q4OCg+bKqJRIJdXbO1ZIlN2jFitu06q5VNb9tT/roAJsqKJ8uqjDiqpCr/QyQE7zwpyWCMUeheODCc3jq8N0Ui0Xt2rVL+7r36fDhwzp9+rSGhmp/oGhpadGsWbO0YMECLV22VCtXrvS8fbcqrpRPZVRM51QYycvN5Rs+BDlBR044pGAspEA8fOE5PHXYFuRKmbMp5f44rPxgRvlMri4zQE4ooFA0rFAiqvAVzReew1OH91MsFrX7xZe17/UDOvLOUfWe6tPQ0LD5sqq0tDSrrb1V8xZ2aekXl2jF7V+uy3btuq76DvXqw/f6NdCb0sj54brMAIUiIcWmNmtKW1LTrp6u1kVtnrelV8Mtujpy8KjeP3pKZ3s+UOrDgZrPAIWjYSWnTdGMjqs0u6td8xZ3ed6WXo1CoaDfbN+pV/e8prf2v62TJ3rqciIZT8Q1Z26Hrrvhc7r5ti/pa6vuqM/xzUP9Qw8AAIAP1D7KAwAA+BChBwAAWIHQAwAArEDoAQAAViD0AAAAKxB6AACAFQg9AADACoQeAABgBUIPAACwAqEHAABYgdADAACsQOgBAABWIPQAAAArEHoAAIAVCD0AAMAKhB4AAGCF/wSOySulgUN78QAAAABJRU5ErkJggg=="/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-white/80 p-8 rounded-xl shadow-inner backdrop-blur-sm text-center">
+<div class="text-4xl font-bold text-clinical-accent mb-1">98.4%</div>
+<div class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Model Accuracy</div>
+</div>
+</div>
+</div>
+<!-- Scanning animation overlay -->
+<div class="absolute top-0 left-0 w-full h-1 bg-clinical-accent/40 shadow-[0_0_15px_#1713ec] z-20 animate-[scan_4s_ease-in-out_infinite]"></div>
+</div>
+</div>
+</section>
+<!-- END: Hero Section -->
+<!-- BEGIN: The Problem -->
+<section class="py-24 bg-white/40" id="problem">
+<div class="max-w-7xl mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">The Challenge in Modern Diagnostics</h2>
+<p class="text-slate-600 max-w-2xl mx-auto">Manual retina scans are slow, labor-intensive, and susceptible to the natural fatigue of even the best specialists.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Human Comparison Card -->
+<div class="glass-morphism p-8 rounded-2xl border-l-4 border-red-200">
+<div class="flex items-center mb-4">
+<div class="p-3 bg-red-50 rounded-lg text-red-500 mr-4">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h3 class="text-xl font-bold">The Human Factor</h3>
+</div>
+<ul class="space-y-4 text-slate-600">
+<li class="flex items-start">
+<span class="mr-2 text-red-400">•</span>
+              Fatigue during long shifts leads to decreased sensitivity.
+            </li>
+<li class="flex items-start">
+<span class="mr-2 text-red-400">•</span>
+              Subjective interpretation creates inter-observer variability.
+            </li>
+<li class="flex items-start">
+<span class="mr-2 text-red-400">•</span>
+              Screening backlogs delay critical early-stage treatment.
+            </li>
+</ul>
+</div>
+<!-- AI Comparison Card -->
+<div class="glass-morphism p-8 rounded-2xl border-l-4 border-clinical-accent">
+<div class="flex items-center mb-4">
+<div class="p-3 bg-blue-50 rounded-lg text-clinical-accent mr-4">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h3 class="text-xl font-bold">The AI Consistency</h3>
+</div>
+<ul class="space-y-4 text-slate-600">
+<li class="flex items-start">
+<span class="mr-2 text-clinical-accent">•</span>
+              Zero fatigue — 24/7 peak performance without degradation.
+            </li>
+<li class="flex items-start">
+<span class="mr-2 text-clinical-accent">•</span>
+              Objective, data-driven analysis based on millions of data points.
+            </li>
+<li class="flex items-start">
+<span class="mr-2 text-clinical-accent">•</span>
+              Instant processing allows for immediate point-of-care results.
+            </li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- END: The Problem -->
+<!-- BEGIN: The Solution -->
+<section class="py-24" id="solution">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col lg:flex-row items-center gap-16">
+<div class="lg:w-1/2">
+<h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Unrivaled Precision. Under a Minute.</h2>
+<p class="text-lg text-slate-600 mb-8 leading-relaxed">
+            Our proprietary deep learning architecture analyzes high-resolution fundus images to detect microaneurysms, hemorrhages, and exudates with superhuman speed.
+          </p>
+<div class="space-y-6">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 flex-shrink-0 bg-clinical-lavender rounded-full flex items-center justify-center text-clinical-deep font-bold">1</div>
+<div>
+<h4 class="font-bold text-slate-800">Advanced Segmentation</h4>
+<p class="text-sm text-slate-500">Isolates vascular structures with micron-level detail.</p>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 flex-shrink-0 bg-clinical-lavender rounded-full flex items-center justify-center text-clinical-deep font-bold">2</div>
+<div>
+<h4 class="font-bold text-slate-800">Anomaly Identification</h4>
+<p class="text-sm text-slate-500">Flags early markers of DR that are often invisible to the eye.</p>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 flex-shrink-0 bg-clinical-lavender rounded-full flex items-center justify-center text-clinical-deep font-bold">3</div>
+<div>
+<h4 class="font-bold text-slate-800">Grading &amp; Reporting</h4>
+<p class="text-sm text-slate-500">Automatic categorization based on clinical severity scales.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:w-1/2 grid grid-cols-2 gap-4">
+<div class="bg-clinical-lavender/30 p-8 rounded-2xl flex flex-col items-center justify-center text-center hover:bg-clinical-lavender/40 transition-colors">
+<span class="text-4xl font-black text-clinical-deep mb-2">98%+</span>
+<span class="text-xs uppercase font-bold tracking-widest text-slate-500">Accuracy</span>
+</div>
+<div class="bg-clinical-accent p-8 rounded-2xl flex flex-col items-center justify-center text-center text-white">
+<span class="text-4xl font-black mb-2">&lt; 30s</span>
+<span class="text-xs uppercase font-bold tracking-widest opacity-80">Processing</span>
+</div>
+<div class="col-span-2 glass-morphism p-12 rounded-2xl flex flex-col items-center justify-center text-center">
+<span class="text-4xl font-black text-slate-900 mb-2">FDA Pending</span>
+<span class="text-xs uppercase font-bold tracking-widest text-slate-500">Clinical Validation Stage</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: The Solution -->
+<!-- BEGIN: Call to Action -->
+<section class="py-24">
+<div class="max-w-5xl mx-auto px-6">
+<div class="relative glass-morphism rounded-3xl p-12 overflow-hidden text-center border-2 border-white">
+<!-- Floating shapes inside CTA -->
+<div class="absolute -top-10 -left-10 w-40 h-40 bg-clinical-lavender rounded-full opacity-30"></div>
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-clinical-mauve rounded-full opacity-30"></div>
+<h2 class="text-3xl md:text-4xl font-bold mb-6 relative z-10">Ready to transform your practice?</h2>
+<p class="text-lg text-slate-600 mb-10 max-w-2xl mx-auto relative z-10">
+          Join leading ophthalmology clinics in pioneering the future of automated diagnostic imaging. 
+        </p>
+<div class="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
+<button class="bg-clinical-accent text-white px-10 py-4 rounded-theme font-bold text-lg hover:shadow-xl hover:shadow-clinical-accent/30 transition-all">
+            Book Demo
+          </button>
+<button class="bg-white border border-slate-200 text-slate-900 px-10 py-4 rounded-theme font-bold text-lg hover:bg-slate-50 transition-all">
+            Get Technical Spec
+          </button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Call to Action -->
+<!-- BEGIN: Footer -->
+<footer class="py-12 border-t border-slate-100 bg-white">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+<div class="flex items-center space-x-2 mb-6 md:mb-0">
+<div class="w-6 h-6 bg-clinical-accent rounded-full"></div>
+<span class="text-lg font-bold tracking-tight text-clinical-deep">RetinaScan AI</span>
+</div>
+<p class="text-slate-400 text-sm">
+        © 2024 RetinaScan AI Technologies. All rights reserved.
+      </p>
+<div class="flex space-x-6 mt-6 md:mt-0 text-sm text-slate-500 font-medium">
+<a class="hover:text-clinical-accent transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-clinical-accent transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-clinical-accent transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<!-- END: Footer -->
+<style data-purpose="animations-extra">
+    @keyframes scan {
+      0%, 100% { top: 0%; }
+      50% { top: 100%; }
+    }
+  </style>
+</body></html>
