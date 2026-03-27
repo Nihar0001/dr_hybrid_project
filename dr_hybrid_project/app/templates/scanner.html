@@ -119,14 +119,14 @@
                         <div class="flex flex-col items-center">
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Original Scan</span>
                             <div class="w-full aspect-square bg-slate-100 rounded-xl overflow-hidden border-4 border-white shadow-sm flex items-center justify-center">
-                                <img src="{{ url_for('static', filename='uploads/' + uploaded_name) }}" alt="Original image" class="max-w-full max-h-full object-contain">
+                                <img src="{{ original_url }}" alt="Original image" class="w-full h-full object-cover">
                             </div>
                         </div>
                         <div class="flex flex-col items-center">
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Segmented</span>
                             <div class="w-full aspect-square bg-slate-100 rounded-xl overflow-hidden border-4 border-white shadow-sm relative flex items-center justify-center">
                                 <div class="absolute inset-0 opacity-20 bg-brand/20 mix-blend-multiply pointer-events-none z-10"></div>
-                                <img src="{{ overlay_url }}" alt="Segmented image" class="max-w-full max-h-full object-contain">
+                                <img src="{{ overlay_url }}" alt="Segmented image" class="w-full h-full object-cover">
                             </div>
                         </div>
                     </div>

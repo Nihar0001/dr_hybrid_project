@@ -24,3 +24,4 @@ models/vgg16_weights*
 # OS files
 .DS_Store
 Thumbs.db
+stitch_screens/

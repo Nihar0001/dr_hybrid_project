@@ -35,14 +35,17 @@ def infer_image(image_path):
     overlay, _ = grad_cam(img_bgr)
     os.makedirs(config.OUTPUTS_DIR, exist_ok=True)
     out_path = os.path.join(config.OUTPUTS_DIR, "gradcam_overlay.png")
-    cv2.imwrite(out_path, overlay)
-    return pred, proba, out_path
+    preprocessed_path = os.path.join(config.OUTPUTS_DIR, "preprocessed_input.png")
+    cv2.imwrite(preprocessed_path, img_bgr)
+
+    return pred, proba, out_path, preprocessed_path
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--image", required=True, help="Path to image")
     args = parser.parse_args()
-    p, pr, hp = infer_image(args.image)
+    p, pr, hp, pp = infer_image(args.image)
     print("Prediction:", p)
     print("Probabilities:", pr)
     print("Grad-CAM saved to:", hp)
+    print("Preprocessed saved to:", pp)
