@@ -34,8 +34,11 @@ def infer_image(image_path):
 
     overlay, _ = grad_cam(img_bgr)
     os.makedirs(config.OUTPUTS_DIR, exist_ok=True)
-    out_path = os.path.join(config.OUTPUTS_DIR, "gradcam_overlay.png")
-    preprocessed_path = os.path.join(config.OUTPUTS_DIR, "preprocessed_input.png")
+    filename = os.path.basename(image_path)
+    name, _ = os.path.splitext(filename)
+    out_path = os.path.join(config.OUTPUTS_DIR, f"{name}_gradcam.png")
+    preprocessed_path = os.path.join(config.OUTPUTS_DIR, f"{name}_input.png")
+    cv2.imwrite(out_path, overlay)              # ✅ ADD THIS
     cv2.imwrite(preprocessed_path, img_bgr)
 
     return pred, proba, out_path, preprocessed_path

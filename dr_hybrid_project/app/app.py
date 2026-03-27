@@ -39,7 +39,7 @@ def scanner():
         f.save(save_path)
 
         try:
-            pred, proba, heatmap_path, preprocessed_path = infer_image(save_path)
+            pred, proba, heatmap_path, *_ = infer_image(save_path)
 
             # Calculate confidence as percentage of predicted class
             confidence = float(proba[pred]) * 100
@@ -54,8 +54,7 @@ def scanner():
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
                 "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
-                "original_url": url_for("outputs_file", filename=os.path.basename(preprocessed_path)),
-                "uploaded_name": filename,
+                "uploaded_url": url_for("uploads_file", filename=filename),
             })
         except Exception as e:
             flash(f"Inference error: {e}")
@@ -95,7 +94,7 @@ def outputs_file(filename):
 
 @app.route("/uploads/<path:filename>")
 def uploads_file(filename):
-    # Serve the original uploaded image
+    os.makedirs(config.UPLOADS_DIR, exist_ok=True)
     return send_from_directory(config.UPLOADS_DIR, filename)
 
 
