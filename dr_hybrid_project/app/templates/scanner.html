@@ -42,6 +42,14 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+
+      body{
+        animation: formFade 1s ease forwards;
+      }
+      @keyframes formFade {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
       html.dark {
         background: #0a0a0b;
         color: #f1f1f1;
@@ -173,9 +181,9 @@
       </div>
       {% endif %} {% endwith %}
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto items-stretch">
         <!-- Input Section -->
-        <div class="glass-card rounded-eight p-8 flex flex-col items-center">
+        <div class="glass-card rounded-eight p-8 flex flex-col items-center ">
           <h2 class="text-xl font-semibold mb-6 text-slate-800">
             <i class="fas fa-camera text-brand mr-2"></i> Input Source
           </h2>
@@ -299,7 +307,7 @@
 </div>
 
   <!-- Status Badge -->
-  {% if 'Normal' in pred_name or 'Class 0' in pred_name %}
+  {% if pred == 0 %}
   <div class="inline-flex items-center gap-2 mt-5 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold border border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
     <i class="fas fa-check-circle"></i> Healthy Retina
   </div>
@@ -310,25 +318,90 @@
   {% endif %}
 
   <!-- Description -->
-  <p class="text-sm text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
-    {{ description }}
-  </p>
+  <div class="mt-4 text-left space-y-3">
+
+    {% if pred == 0 %}
+  {% set width = '20%' %}
+  {% set color = '#22c55e' %}
+{% elif 'Mild' in pred_name %}
+  {% set width = '40%' %}
+  {% set color = '#eab308' %}
+{% elif 'Moderate' in pred_name %}
+  {% set width = '70%' %}
+  {% set color = '#f97316' %}
+{% else %}
+  {% set width = '100%' %}
+  {% set color = '#ef4444' %}
+{% endif %}
+
+  <!-- Severity -->
+  <div class="flex items-center justify-between text-sm">
+    <span class="text-slate-500 dark:text-slate-400">Severity Level</span>
+
+<div class="w-full h-2 bg-slate-200 dark:bg-[#222] rounded-full mt-2">
+  <div 
+    class="h-full rounded-full"
+    style="width: {{ width }}; background: {{ color }};">
+  </div>
+</div>
+</div>
+
+    {% if pred == 0 %}
+      <span class="font-semibold text-green-600 dark:text-green-400">Low</span>
+    {% elif 'Mild' in pred_name %}
+      <span class="font-semibold text-yellow-500">Mild</span>
+    {% elif 'Moderate' in pred_name %}
+      <span class="font-semibold text-orange-500">Moderate</span>
+    {% else %}
+      <span class="font-semibold text-red-500">High</span>
+    {% endif %}
+  </div>
+
+  <!-- Risk Indicator -->
+  <div class="flex items-center justify-between text-sm">
+    <span class="text-slate-500 dark:text-slate-400">Risk Assessment</span>
+
+    {% if pred == 0 %}
+      <span class="text-green-600 dark:text-green-400 font-medium">No immediate risk</span>
+    {% else %}
+      <span class="text-red-500 font-medium">Potential DR detected</span>
+    {% endif %}
+  </div>
+
+  <!-- Recommendation -->
+  <div class="flex items-start justify-between text-sm">
+    <span class="text-slate-500 dark:text-slate-400">Recommendation</span>
+
+    {% if pred == 0 %}
+      <span class="text-right text-green-600 dark:text-green-400 font-medium">
+        Routine check-up recommended
+      </span>
+    {% elif 'Mild' in pred_name %}
+      <span class="text-right text-yellow-500 font-medium">
+        Monitor regularly and consult specialist
+      </span>
+    {% elif 'Moderate' in pred_name %}
+      <span class="text-right text-orange-500 font-medium">
+        Clinical evaluation advised soon
+      </span>
+    {% else %}
+      <span class="text-right text-red-500 font-medium">
+        Immediate medical attention required
+      </span>
+    {% endif %}
+  </div>
+
+  <!-- Original Description -->
+  <div class="pt-3 border-t border-slate-200 dark:border-white/10">
+    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+      {{ description }}
+    </p>
+  </div>
 
 </div>
-              <h3
-                class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3"
-              >
-                Diagnostic Output
-              </h3>
-              <div
-                class="text-3xl font-extrabold text-slate-900 tracking-tight"
-              >
-                {{ pred_name }}
-                <span class="text-sm font-medium text-slate-500"
-                  >({{ confidence }}%)</span
-                >
-              </div>
-              {% if 'Normal' in pred_name or 'Class 0' in pred_name %}
+
+</div>
+              {% if pred == 0 %}
               <div
                 class="inline-flex items-center gap-2 mt-4 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold border border-green-100"
               >

@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, session
 from werkzeug.utils import secure_filename
 
 # --- make 'src' importable when app runs from app/ ---
@@ -46,15 +46,42 @@ def scanner():
             pred_class_name = config.CLASS_NAMES[int(pred)]
             pred_description = config.CLASS_DESCRIPTIONS[int(pred)]
 
+            predicted_class = int(pred)
+            if predicted_class == 0:
+                prediction_label = "No Diabetic Retinopathy Detected"
+                severity_level = "None"
+            else:
+                prediction_label = "Diabetic Retinopathy Detected"
+                severity_level = f"Class {predicted_class}"
+            if predicted_class == 0:
+                    risk = "Low"
+            elif predicted_class <= 2:
+                    risk = "Moderate"
+            else:
+                    risk = "High"
+
+            session["last_result"] = {
+                "prediction": prediction_label,
+                "confidence": round(confidence, 1),
+                "severity": severity_level,
+                "risk": risk,   # ✅ ADD THIS LINE
+                "cm_url": url_for("outputs_file", filename="model_accuracy_bar_chart.png"),
+                "f1_url": url_for("outputs_file", filename="normalized_cm_votingclassifier.png"),
+                "radar_url": url_for("outputs_file", filename="model_radar_chart.png")
+            }
+
             context.update({
                 "pred": int(pred),
-                "pred_name": pred_class_name,
-                "confidence": f"{confidence:.1f}",
+                "prediction_label": prediction_label,
+                "severity": severity_level,
+                "confidence": round(confidence, 1),
                 "description": pred_description,
+                "pred_name": pred_class_name,
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
                 "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
                 "uploaded_url": url_for("uploads_file", filename=filename),
+                "risk": risk,
             })
         except Exception as e:
             flash(f"Inference error: {e}")
@@ -70,7 +97,9 @@ def index():
 
 @app.route("/dashboard")
 def dashboard():
-    # Show analysis artifacts if they exist
+    result = session.get("last_result", None)
+
+    # Chart files
     cm = "model_accuracy_bar_chart.png"
     f1 = "normalized_cm_votingclassifier.png"
     radar = "model_radar_chart.png"
@@ -81,11 +110,18 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
+
+        # 🔥 Dynamic scan data
+        prediction=result.get("prediction") if result else None,
+        confidence=result.get("confidence") if result else None,
+        severity=result.get("severity") if result else None,
+        risk=result["risk"] if result else None,
+
+        # 📊 Charts
         cm_url=url_for("outputs_file", filename=cm) if cm_exists else None,
         f1_url=url_for("outputs_file", filename=f1) if f1_exists else None,
         radar_url=url_for("outputs_file", filename=radar) if radar_exists else None,
     )
-
 
 @app.route("/outputs/<path:filename>")
 def outputs_file(filename):

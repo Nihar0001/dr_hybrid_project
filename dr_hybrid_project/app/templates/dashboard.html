@@ -1,152 +1,382 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RetinaScan AI - Analytics Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: '#1713ec',
-            clinical: {
-              light: '#f8f7ff',
-              soft: '#eeebff',
-              lavender: '#e0d7ff',
-              mauve: '#f3e8ff'
-            }
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>RetinaScan AI - Analytics Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: "#1713ec",
+              clinical: {
+                light: "#f8f7ff",
+                soft: "#eeebff",
+                lavender: "#e0d7ff",
+                mauve: "#f3e8ff",
+              },
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              eight: "8px",
+            },
           },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-          borderRadius: {
-            'eight': '8px',
-          }
+        },
+      };
+    </script>
+    <script>
+      function animateValue(el, start, end, duration) {
+        let range = end - start;
+        let current = start;
+        let increment = end > start ? 1 : -1;
+        let stepTime = Math.abs(Math.floor(duration / range));
+
+        let timer = setInterval(() => {
+          current += increment;
+          el.textContent = current + "%";
+          if (current == end) clearInterval(timer);
+        }, stepTime);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const confEl = document.querySelector("#confidenceValue");
+        if (confEl && confEl.dataset.value) {
+          let value = parseInt(confEl.dataset.value);
+          animateValue(confEl, 0, value, 800);
+        }
+      });
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        animation: formFade 1s ease forwards;
+      }
+      @keyframes formFade {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
-    }
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-    .glass-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-    }
-    .gradient-bg {
-      background: linear-gradient(135deg, #f8f7ff 0%, #f3e8ff 50%, #e0d7ff 100%);
-      min-height: 100vh;
-    }
-    nav a.active {
-      color: #1713ec;
-      font-weight: 600;
-    }
-</style>
-</head>
-<body class="font-sans text-slate-800 gradient-bg">
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+        transition: all 0.3s ease;
+      }
 
-<!-- Navigation -->
-<nav class="w-full z-50 p-6 flex items-center justify-between max-w-7xl mx-auto">
-  <div class="flex items-center space-x-2">
-    <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
-      <div class="w-4 h-4 bg-white rounded-full"></div>
-    </div>
-    <span class="text-xl font-bold tracking-tight text-slate-900">RetinaScan <span class="text-brand">AI</span></span>
-  </div>
-  <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
-    <a href="{{ url_for('index') }}" class="hover:text-brand transition-colors">Home</a>
-    <a href="{{ url_for('dashboard') }}" class="hover:text-brand transition-colors active">Dashboard</a>
-    <a href="{{ url_for('scanner') }}" class="hover:text-brand transition-colors">Diagnostic View</a>
-  </div>
-  <div>
-     <a href="{{ url_for('scanner') }}" class="bg-brand text-white px-6 py-2.5 rounded-eight text-sm font-semibold hover:shadow-lg transition-all inline-block">New Scan</a>
-  </div>
-</nav>
-
-<header class="py-8 px-6 text-center">
-  <div class="max-w-4xl mx-auto">
-    <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">SYSTEM / ANALYTICS / ENSEMBLE_V1.4</div>
-    <h1 class="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4">Inside the Intelligence</h1>
-    <p class="text-lg text-slate-600 font-medium">Exploring the deep learning foundations and rigorous performance benchmarks of RetinaScan AI.</p>
-  </div>
-</header>
-
-<main class="max-w-7xl mx-auto px-4 pb-24">
-  
-  <section class="mb-12">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div class="glass-card rounded-eight p-6 flex gap-4 items-center">
-         <div class="text-4xl text-brand"><i class="fas fa-notes-medical"></i></div>
-         <div>
-            <h3 class="font-bold text-slate-800">Medical Reference: Diabetic Retinopathy</h3>
-            <p class="text-slate-600 text-sm mt-1">Vessel segmentation analysis categorized across 5 severity levels: Class 0 to Class 4.</p>
-         </div>
+.glass-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(23, 19, 236, 0.15);
+}
+      .gradient-bg {
+        background: linear-gradient(
+          135deg,
+          #f8f7ff 0%,
+          #f3e8ff 50%,
+          #e0d7ff 100%
+        );
+        min-height: 100vh;
+      }
+      nav a.active {
+        color: #1713ec;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body
+    class="font-sans text-slate-800 gradient-bg transition-all duration-300"
+  >
+    <!-- Navigation -->
+    <nav
+      class="w-full z-50 p-6 flex items-center justify-between max-w-7xl mx-auto"
+    >
+      <div class="flex items-center space-x-2">
+        <div
+          class="w-8 h-8 bg-brand rounded-full flex items-center justify-center"
+        >
+          <div class="w-4 h-4 bg-white rounded-full"></div>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-slate-900"
+          >RetinaScan <span class="text-brand">AI</span></span
+        >
       </div>
-      <div class="glass-card rounded-eight p-6 flex flex-col justify-center">
-         <h3 class="font-bold text-slate-800">Hybrid Feature Fusion</h3>
-         <div class="text-2xl font-bold text-brand mt-2">32,818 VECTORS</div>
-         <p class="text-slate-500 text-xs mt-1">Combined CNN Shape + GLCM Texture + LBP Pattern.</p>
+      <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+        <a
+          href="{{ url_for('index') }}"
+          class="hover:text-brand transition-colors"
+          >Home</a
+        >
+        <a
+          href="{{ url_for('dashboard') }}"
+          class="hover:text-brand transition-colors active"
+          >Dashboard</a
+        >
+        <a
+          href="{{ url_for('scanner') }}"
+          class="hover:text-brand transition-colors"
+          >Diagnostic View</a
+        >
       </div>
-    </div>
-  </section>
+      <div>
+        <a
+          href="{{ url_for('scanner') }}"
+          class="bg-brand text-white px-6 py-2.5 rounded-eight text-sm font-semibold hover:shadow-lg transition-all inline-block"
+          >New Scan</a
+        >
+      </div>
+    </nav>
 
-  <section class="mb-20">
-    <div class="flex items-center gap-4 mb-8">
-      <div class="h-8 w-1 bg-brand rounded-full"></div>
-      <h2 class="text-2xl font-bold text-slate-800">Performance Metrics</h2>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <header class="py-8 px-6 text-center">
+      <div class="max-w-4xl mx-auto">
+        <div
+          class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2"
+        >
+          SYSTEM / ANALYTICS / ENSEMBLE_V1.4
+        </div>
+        <h1
+          class="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4 leading-tight"
+        >
+          Inside the Intelligence
+          <span class="block text-brand text-lg mt-2 font-medium tracking-wide">
+            RetinaScan AI Analytics Core
+          </span>
+        </h1>
+        <p class="text-lg text-slate-600 font-medium">
+          Exploring the deep learning foundations and rigorous performance
+          benchmarks of RetinaScan AI.
+        </p>
+      </div>
+    </header>
 
-      <!-- Accuracy Chart Container -->
-      <div class="glass-card rounded-eight p-6 flex flex-col items-center">
-        <h3 class="text-lg font-semibold mb-6 text-slate-700"><i class="fas fa-chart-bar text-brand"></i> Accuracy Benchmarking</h3>
-        <div class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2">
-          {% if cm_url %}
-            <img src="{{ cm_url }}" alt="Model Accuracy Bar Chart" class="w-full h-auto block">
-          {% else %}
-            <div class="text-slate-500 text-sm py-10 text-center">Awaiting Model Metadata...</div>
-          {% endif %}
+    <section class="mb-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Prediction -->
+        <div class="glass-card p-6 text-center">
+          <h4 class="text-sm text-slate-500">Prediction</h4>
+          <div class="text-2xl font-bold text-brand mt-2">
+            {{ prediction if prediction else "No Data" }}
+          </div>
+        </div>
+
+        <!-- Confidence -->
+        <div class="glass-card p-6 text-center">
+          <h4 class="text-sm text-slate-500">Confidence</h4>
+          <div
+            id="confidenceValue"
+            data-value="{{ confidence if confidence else 0 }}"
+          >
+            0%
+          </div>
+        </div>
+
+        <!-- Severity -->
+        <div class="glass-card p-6 text-center">
+          <h4 class="text-sm text-slate-500">Severity Level</h4>
+          <div class="text-2xl font-bold mt-2
+  {% if severity == 'None' %}
+    text-green-600
+  {% elif severity == 'Class 1' or severity == 'Class 2' %}
+    text-yellow-600
+  {% else %}
+    text-red-600
+  {% endif %}
+">
+        </div>
+
+        <!-- Risk Level -->
+        <div class="glass-card p-6 text-center">
+          <h4 class="text-sm text-slate-500">Risk Level</h4>
+
+          <div class="mt-2">
+            {% if risk == "Low" %}
+            <span
+              class="px-4 py-1 rounded-full text-green-600 bg-green-100 font-semibold"
+            >
+              Low Risk
+            </span>
+            {% elif risk == "Moderate" %}
+            <span
+              class="px-4 py-1 rounded-full text-yellow-600 bg-yellow-100 font-semibold"
+            >
+              Moderate Risk
+            </span>
+            {% elif risk == "High" %}
+            <span
+              class="px-4 py-1 rounded-full text-red-600 bg-red-100 font-semibold"
+            >
+              High Risk
+            </span>
+            {% else %}
+            <span class="text-slate-400">--</span>
+            {% endif %}
+          </div>
         </div>
       </div>
+    </section>
 
-      <!-- confusion Matrix Chart Container -->
-      <div class="glass-card rounded-eight p-6 flex flex-col items-center">
-        <h3 class="text-lg font-semibold mb-6 text-slate-700"><i class="fas fa-border-all text-brand"></i> Error Matrix</h3>
-        <div class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2">
-          {% if f1_url %}
-            <img src="{{ f1_url }}" alt="Normalized Confusion Matrix" class="w-full h-auto block">
-          {% else %}
-            <div class="text-slate-500 text-sm py-10 text-center">Awaiting Model Metadata...</div>
-          {% endif %}
-        </div>
+    <div class="flex justify-center mt-4">
+      <div class="flex items-center gap-2 text-sm font-medium text-green-600">
+        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+        System Active • Model Ready
       </div>
-
-      <!-- Radar Chart Container -->
-      <div class="glass-card rounded-eight p-6 flex flex-col items-center">
-        <h3 class="text-lg font-semibold mb-6 text-slate-700"><i class="fas fa-spider text-brand"></i> Distribution Profile</h3>
-        <div class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2">
-          {% if radar_url %}
-            <img src="{{ radar_url }}" alt="Model Radar Chart" class="w-full h-auto block">
-          {% else %}
-            <div class="text-slate-500 text-sm py-10 text-center">Awaiting Model Metadata...</div>
-          {% endif %}
-        </div>
-      </div>
-
+      <div class="text-center text-xs text-slate-400 mt-2">
+  Last Updated: {{ "Now" if prediction else "No recent scan" }}
+</div>
     </div>
-  </section>
 
-  <div class="flex justify-end">
-    <a href="{{ url_for('scanner') }}" class="bg-brand text-white px-8 py-4 rounded-eight font-bold shadow-lg hover:bg-brand/90 transition-all inline-block">
-      <i class="fas fa-microscope mr-2"></i> INITIALIZE DIAGNOSTIC SEQUENCE
-    </a>
-  </div>
+    <main class="max-w-7xl mx-auto px-6 md:px-8 pb-24">
+      <section class="mb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="glass-card rounded-eight p-6 flex gap-4 items-center">
+            <div class="text-4xl text-brand">
+              <i class="fas fa-notes-medical"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-800">
+                Medical Reference: Diabetic Retinopathy
+              </h3>
+              <p class="text-slate-600 text-sm mt-1">
+                Vessel segmentation analysis categorized across 5 severity
+                levels: Class 0 to Class 4.
+              </p>
+            </div>
+          </div>
+          <div
+            class="glass-card rounded-eight p-6 flex flex-col justify-center"
+          >
+            <h3 class="font-bold text-slate-800">Hybrid Feature Fusion</h3>
+            <div class="text-2xl font-bold text-brand mt-2">32,818 VECTORS</div>
+            <p class="text-slate-500 text-xs mt-1">
+              Combined CNN Shape + GLCM Texture + LBP Pattern.
+            </p>
+          </div>
+        </div>
+      </section>
+      {% if not prediction %}
+<div class="text-center py-12 text-slate-500">
+  <i class="fas fa-info-circle text-2xl mb-2"></i>
+  <p>No scan data available. Please perform a scan.</p>
+</div>
+{% endif %}
 
-</main>
-</body>
+      <section class="mb-20">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="h-8 w-1 bg-brand rounded-full"></div>
+          <h2 class="text-2xl font-bold text-slate-800">Performance Metrics</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Accuracy Chart Container -->
+          <div class="glass-card rounded-eight p-6 flex flex-col items-center">
+            <h3 class="text-lg font-semibold mb-6 text-slate-700">
+              <i class="fas fa-chart-bar text-brand"></i> Accuracy Benchmarking
+            </h3>
+            <div
+              class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2"
+            >
+              {% if cm_url %}
+              <img
+                src="{{ cm_url }}"
+                alt="Model Accuracy Bar Chart"
+                class="w-full h-auto block"
+              />
+              {% else %}
+              <div
+                class="flex flex-col items-center justify-center py-10 text-slate-400 text-sm"
+              >
+                <div
+                  class="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin mb-2"
+                ></div>
+                Loading Model Data...
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- confusion Matrix Chart Container -->
+          <div class="glass-card rounded-eight p-6 flex flex-col items-center">
+            <h3 class="text-lg font-semibold mb-6 text-slate-700">
+              <i class="fas fa-border-all text-brand"></i> Error Matrix
+            </h3>
+            <div
+              class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2"
+            >
+              {% if f1_url %}
+              <img
+                src="{{ f1_url }}"
+                alt="Normalized Confusion Matrix"
+                class="w-full h-auto block"
+              />
+              {% else %}
+              <div class="text-slate-500 text-sm py-10 text-center">
+                Awaiting Model Metadata...
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Radar Chart Container -->
+          <div class="glass-card rounded-eight p-6 flex flex-col items-center">
+            <h3 class="text-lg font-semibold mb-6 text-slate-700">
+              <i class="fas fa-spider text-brand"></i> Distribution Profile
+            </h3>
+            <div
+              class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2"
+            >
+              {% if radar_url %}
+              <img
+                src="{{ radar_url }}"
+                alt="Model Radar Chart"
+                class="w-full h-auto block"
+              />
+              {% else %}
+              <div class="text-slate-500 text-sm py-10 text-center">
+                Awaiting Model Metadata...
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="flex justify-end">
+        <a
+          href="{{ url_for('scanner') }}"
+          class="bg-brand text-white px-8 py-4 rounded-eight font-bold shadow-lg hover:bg-brand/90 transition-all inline-block"
+        >
+          <i class="fas fa-microscope mr-2"></i> START NEW RETINAL ANALYSIS
+        </a>
+      </div>
+    </main>
+
+    <script>
+      document.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", function (e) {
+          if (this.href && !this.href.includes("#")) {
+            e.preventDefault();
+            document.body.classList.add("opacity-0", "translate-y-5");
+            setTimeout(() => {
+              window.location = this.href;
+            }, 300);
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

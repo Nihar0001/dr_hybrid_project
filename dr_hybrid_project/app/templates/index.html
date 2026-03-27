@@ -9,7 +9,11 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">
+  if (localStorage.getItem("theme") === "dark") {
+  document.documentElement.classList.add("dark");
+}
+</script>
 <!-- Tailwind Configuration -->
 <script data-purpose="tailwind-config">
     tailwind.config = {
@@ -35,6 +39,35 @@
     }
   </script>
 <style data-purpose="custom-animations">
+        body{
+        animation: formFade 1s ease forwards;
+      }
+      @keyframes formFade {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+  .dark body {
+  background: #0a0a0b;
+  color: #f1f1f1;
+}
+
+.dark .glass-morphism {
+  background: rgba(20, 20, 22, 0.7);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.dark .text-slate-900 {
+  color: #f1f1f1 !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #9ca3af !important;
+}
+
+.dark .bg-white {
+  background: #141416 !important;
+}
     @keyframes float {
       0% { transform: translateY(0px); }
       50% { transform: translateY(-20px); }
@@ -52,6 +85,33 @@
     .gradient-bg {
       background: radial-gradient(circle at top right, #fdf4ff, #ffffff, #f5f3ff);
     }
+    .dark #problem {
+  background:rgba(20, 20, 22, 0.6) !important;
+}
+/* Dark mode specific button styling */
+.dark .btn-light-text {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Hover state */
+.dark .btn-light-text:hover {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+.dark .card-lavender {
+  background: rgba(40, 30, 80, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.dark .card-lavender span {
+  color: #c4b5fd !important; /* soft purple accent */
+}
+
+.dark .card-lavender:hover {
+  background: rgba(60, 40, 120, 0.7) !important;
+}
   </style>
 </head>
 <body class="font-sans text-slate-900 gradient-bg selection:bg-clinical-mauve/30">
@@ -65,14 +125,22 @@
 <span class="text-xl font-bold tracking-tight text-clinical-deep">RetinaScan <span class="text-clinical-accent">AI</span></span>
 </div>
 <div class="hidden md:flex space-x-8 text-sm font-medium">
-<a class="hover:text-clinical-accent transition-colors" href="#problem">The Challenge</a>
+<a style="padding-left: 100px;" class="hover:text-clinical-accent transition-colors" href="#problem">The Challenge</a>
 <a class="hover:text-clinical-accent transition-colors" href="#solution">Technology</a>
-<a class="hover:text-clinical-accent transition-colors" href="#clinical">Clinical Data</a>
+<!-- <a class="hover:text-clinical-accent transition-colors" href="#clinical">Clinical Data</a> -->
 </div>
-<div>
+<div class="flex items-center gap-4">
+
+<!-- Dark Mode Toggle -->
+<div id="themeToggle" class="relative w-20 h-9 bg-gradient-to-r from-yellow-200 to-slate-300 rounded-full cursor-pointer flex items-center px-1 transition-all duration-300 shadow-inner"> <div id="toggleCircle" class="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center transform transition-all duration-300">
+    🌞
+  </div>
+</div>
+
 <a href="{{ url_for('scanner') }}" class="bg-clinical-accent text-white px-6 py-2.5 rounded-theme text-sm font-semibold hover:shadow-lg hover:shadow-clinical-accent/20 transition-all inline-block">
-          Launch Scanner
+  Launch Scanner
 </a>
+
 </div>
 </div>
 </nav>
@@ -80,7 +148,7 @@
 <!-- BEGIN: Hero Section -->
 <section class="relative pt-32 pb-20 overflow-hidden min-h-screen flex items-center">
 <!-- Decorative Elements -->
-<div class="absolute top-40 right-[-10%] w-96 h-96 bg-clinical-lavender rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
+<div class="absolute top-40 right-[-10%] w-96 h-96 bg-clinical-lavender rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float z-index:1"></div>
 <div class="absolute bottom-20 left-[-5%] w-72 h-72 bg-clinical-mauve rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style="animation-delay: 2s;"></div>
 <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
 <div data-purpose="hero-content">
@@ -96,10 +164,10 @@
           Revolutionizing diabetic retinopathy screening with state-of-the-art neural networks. Reduce human error and provide results in real-time.
         </p>
 <div class="flex flex-col sm:flex-row gap-4">
-<a href="{{ url_for('scanner') }}" class="bg-slate-900 text-white px-8 py-4 rounded-theme font-bold hover:bg-slate-800 transition-all text-center inline-block">
+<a href="{{ url_for('scanner') }}" class="bg-slate-900 text-white px-8 py-4 rounded-theme font-bold hover:bg-slate-800 transition-all text-center inline-block hover:scale-105 active:scale-95 shadow-md hover:shadow-xl">
             Launch Scanner
 </a>
-<a href="{{ url_for('dashboard') }}" class="glass-morphism border border-slate-200 text-slate-900 px-8 py-4 rounded-theme font-bold hover:bg-white transition-all text-center inline-block">
+<a href="{{ url_for('dashboard') }}" class="glass-morphism border border-slate-200 text-slate-900 btn-light-text px-8 py-4 rounded-theme font-bold hover:bg-white transition-all text-center inline-block shadow-sm hover:shadow-lg hover:scale-105 active:scale-95">
             View Analytics Dashboard
 </a>
 </div>
@@ -107,7 +175,8 @@
 <div class="relative" data-purpose="hero-visual">
 <!-- Abstract AI representation -->
 <div class="relative z-10 glass-morphism p-4 rounded-2xl shadow-2xl border border-white/50">
-<img alt="AI Retina Scan Visualization" class="w-full h-auto rounded-lg opacity-80" data-purpose="abstract-visual" src="{{ url_for('static', filename='gradcam_overlay.png') }}"/>
+<div class="absolute left-0 w-full h-1 bg-clinical-accent/40 shadow-[0_0_15px_#1713ec] animate-[scan_4s_ease-in-out_infinite]"></div>
+<img alt="AI Retina Scan Visualization" class="w-full h-auto rounded-lg opacity-90 shadow-[0_0_40px_rgba(23,19,236,0.25)]" data-purpose="abstract-visual" src="{{ url_for('static', filename='gradcam_overlay.png') }}"/>
 </div>
 
 <div class="absolute inset-0 flex items-center justify-center">
@@ -118,7 +187,7 @@
 </div>
 </div>
 <!-- Scanning animation overlay -->
-<div class="absolute top-0 left-0 w-full h-1 bg-clinical-accent/40 shadow-[0_0_15px_#1713ec] z-20 animate-[scan_4s_ease-in-out_infinite]"></div>
+<!-- <div class="absolute top-0 left-0 w-full h-1 bg-clinical-accent/40 shadow-[0_0_15px_#1713ec] z-20 animate-[scan_4s_ease-in-out_infinite]"></div> -->
 </div>
 </div>
 </section>
@@ -219,7 +288,7 @@
 </div>
 </div>
 <div class="lg:w-1/2 grid grid-cols-2 gap-4">
-<div class="bg-clinical-lavender/30 p-8 rounded-2xl flex flex-col items-center justify-center text-center hover:bg-clinical-lavender/40 transition-colors">
+<div class="bg-clinical-lavender/30 card-lavender p-8 rounded-2xl flex flex-col items-center justify-center text-center hover:bg-clinical-lavender/40 transition-colors">
 <span class="text-4xl font-black text-clinical-deep mb-2">98%+</span>
 <span class="text-xs uppercase font-bold tracking-widest text-slate-500">Accuracy</span>
 </div>
@@ -248,10 +317,10 @@
           Join leading ophthalmology clinics in pioneering the future of automated diagnostic imaging. 
         </p>
 <div class="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
-<a href="{{ url_for('scanner') }}" class="bg-clinical-accent text-white px-10 py-4 rounded-theme font-bold text-lg hover:shadow-xl hover:shadow-clinical-accent/30 transition-all inline-block">
+<a href="{{ url_for('scanner') }}" class="bg-clinical-accent text-white px-10 py-4 rounded-theme font-bold text-lg hover:shadow-xl hover:shadow-clinical-accent/30 transition-all inline-block shadow-md hover:shadow-xl hover:scale-105 active:scale-95">
             Launch Scanner
 </a>
-<a href="{{ url_for('dashboard') }}" class="bg-white border border-slate-200 text-slate-900 px-10 py-4 rounded-theme font-bold text-lg hover:bg-slate-50 transition-all inline-block">
+<a href="{{ url_for('dashboard') }}" class="bg-white border border-slate-200 text-slate-900 px-10 py-4 rounded-theme font-bold text-lg hover:bg-slate-50 transition-all inline-block shadow-sm hover:shadow-lg hover:scale-105 active:scale-95">
             View Analytics
 </a>
 </div>
@@ -283,4 +352,48 @@
       50% { top: 100%; }
     }
   </style>
+
+  <script>
+const toggle = document.getElementById("themeToggle");
+const circle = document.getElementById("toggleCircle");
+
+// APPLY SAVED THEME ON LOAD
+if (localStorage.getItem("theme") === "dark") {
+  document.documentElement.classList.add("dark");
+  if (circle) {
+    circle.style.transform = "translateX(40px)";
+    circle.textContent = "🌙";
+  }
+  if (toggle) {
+    toggle.classList.remove("from-yellow-200", "to-slate-300");
+    toggle.classList.add("from-slate-700", "to-slate-900");
+  }
+}
+
+// TOGGLE FUNCTION
+if (toggle) {
+  toggle.addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark");
+
+    if (document.documentElement.classList.contains("dark")) {
+      localStorage.setItem("theme", "dark");
+
+      circle.style.transform = "translateX(40px)";
+      circle.textContent = "🌙";
+
+      toggle.classList.remove("from-yellow-200", "to-slate-300");
+      toggle.classList.add("from-slate-700", "to-slate-900");
+
+    } else {
+      localStorage.setItem("theme", "light");
+
+      circle.style.transform = "translateX(0px)";
+      circle.textContent = "🌞";
+
+      toggle.classList.remove("from-slate-700", "to-slate-900");
+      toggle.classList.add("from-yellow-200", "to-slate-300");
+    }
+  });
+}
+</script>
 </body></html>
