@@ -84,7 +84,7 @@ def scanner():
                 "class_names": config.CLASS_NAMES,
               
                 "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path), t=time.time()),
-                "original_url": url_for("outputs_file", filename=os.path.basename(preprocessed_path), t=time.time()),
+                "original_url": url_for("uploads_file", filename=os.path.basename(preprocessed_path), t=time.time()),
                 "uploaded_name": filename,
                 "uploaded_url": url_for("uploads_file", filename=filename),
                 "risk": risk,
