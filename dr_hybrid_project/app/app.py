@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash
 from werkzeug.utils import secure_filename
 
@@ -53,8 +54,8 @@ def scanner():
                 "description": pred_description,
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
-                "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
-                "original_url": url_for("outputs_file", filename=os.path.basename(preprocessed_path)),
+                "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path), t=time.time()),
+                "original_url": url_for("outputs_file", filename=os.path.basename(preprocessed_path), t=time.time()),
                 "uploaded_name": filename,
             })
         except Exception as e:
