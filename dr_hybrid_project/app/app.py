@@ -42,7 +42,7 @@ def scanner():
         f.save(save_path)
 
         try:
-            pred, proba, heatmap_path, *_ = infer_image(save_path)
+            pred, proba, heatmap_path, preprocessed_path = infer_image(save_path)
 
             # Calculate confidence as percentage of predicted class
             confidence = float(proba[pred]) * 100
