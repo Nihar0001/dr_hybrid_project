@@ -1,6 +1,9 @@
 import os
 import sys
+import time
+
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, session
+ 
 from werkzeug.utils import secure_filename
 
 # --- make 'src' importable when app runs from app/ ---
@@ -79,9 +82,15 @@ def scanner():
                 "pred_name": pred_class_name,
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
-                "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
+              
+                "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path), t=time.time()),
+                "original_url": url_for("outputs_file", filename=os.path.basename(preprocessed_path), t=time.time()),
+                "uploaded_name": filename,
                 "uploaded_url": url_for("uploads_file", filename=filename),
                 "risk": risk,
+
+              
+
             })
         except Exception as e:
             flash(f"Inference error: {e}")
