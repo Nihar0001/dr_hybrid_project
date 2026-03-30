@@ -34,6 +34,10 @@
     </script>
     <script>
       function animateValue(el, start, end, duration) {
+        if (start === end) {
+          el.textContent = end + "%";
+          return;
+        }
         let range = end - start;
         let current = start;
         let increment = end > start ? 1 : -1;
@@ -192,12 +196,13 @@
           <div class="text-2xl font-bold mt-2
   {% if severity == 'None' %}
     text-green-600
-  {% elif severity == 'Class 1' or severity == 'Class 2' %}
+  {% elif severity == 'Mild' or severity == 'Moderate' %}
     text-yellow-600
   {% else %}
     text-red-600
   {% endif %}
 ">
+            {{ severity if severity else "--" }}
         </div>
 
         <!-- Risk Level -->
@@ -206,22 +211,24 @@
 
           <div class="mt-2">
             {% if risk == "Low" %}
-            <span
-              class="px-4 py-1 rounded-full text-green-600 bg-green-100 font-semibold"
-            >
+            <span class="px-4 py-1 rounded-full text-green-600 bg-green-100 font-semibold">
               Low Risk
             </span>
+            {% elif risk == "Mild" %}
+            <span class="px-4 py-1 rounded-full text-yellow-500 bg-yellow-50 font-semibold">
+              Mild Risk
+            </span>
             {% elif risk == "Moderate" %}
-            <span
-              class="px-4 py-1 rounded-full text-yellow-600 bg-yellow-100 font-semibold"
-            >
+            <span class="px-4 py-1 rounded-full text-orange-500 bg-orange-50 font-semibold">
               Moderate Risk
             </span>
             {% elif risk == "High" %}
-            <span
-              class="px-4 py-1 rounded-full text-red-600 bg-red-100 font-semibold"
-            >
+            <span class="px-4 py-1 rounded-full text-red-600 bg-red-100 font-semibold">
               High Risk
+            </span>
+            {% elif risk == "Critical" %}
+            <span class="px-4 py-1 rounded-full text-red-700 bg-red-200 font-bold">
+              Critical
             </span>
             {% else %}
             <span class="text-slate-400">--</span>
