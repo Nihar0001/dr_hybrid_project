@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
       tailwind.config = {
+        darkMode: "class",
         theme: {
           extend: {
             colors: {
@@ -33,6 +34,12 @@
       };
     </script>
     <script>
+      // ✅ Apply saved theme BEFORE render
+      if (localStorage.getItem("theme") === "dark") {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
+    <script>
       function animateValue(el, start, end, duration) {
         if (start === end) {
           el.textContent = end + "%";
@@ -41,18 +48,18 @@
         let range = end - start;
         let current = start;
         let increment = end > start ? 1 : -1;
-        let stepTime = Math.abs(Math.floor(duration / range));
+        let stepTime = Math.max(10, Math.abs(Math.floor(duration / range)));
 
         let timer = setInterval(() => {
           current += increment;
           el.textContent = current + "%";
-          if (current == end) clearInterval(timer);
+          if (current === end) clearInterval(timer);
         }, stepTime);
       }
 
       document.addEventListener("DOMContentLoaded", () => {
         const confEl = document.querySelector("#confidenceValue");
-        if (confEl && confEl.dataset.value) {
+        if (confEl && confEl.dataset.value && confEl.dataset.value != -1) {
           let value = parseInt(confEl.dataset.value);
           animateValue(confEl, 0, value, 800);
         }
@@ -83,30 +90,75 @@
         border: 1px solid rgba(255, 255, 255, 0.3);
         box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
         transition: all 0.3s ease;
+        animation: fadeUp 0.6s ease;
+        animation-fill-mode: both;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
-.glass-card:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 20px 40px rgba(23, 19, 236, 0.15);
-}
+      .glass-card:hover {
+        transform: translateY(-4px) scale(1.005);
+        box-shadow: 0 20px 40px rgba(23, 19, 236, 0.15);
+      }
       .gradient-bg {
-        background: linear-gradient(
-          135deg,
-          #f8f7ff 0%,
-          #f3e8ff 50%,
-          #e0d7ff 100%
+        background: radial-gradient(
+          circle at top right,
+          #fdf4ff,
+          #ffffff,
+          #f5f3ff
         );
         min-height: 100vh;
+      }
+      .dark .gradient-bg {
+        background: radial-gradient(circle at top right, #1a1a1d, #0a0a0b);
       }
       nav a.active {
         color: #1713ec;
         font-weight: 600;
       }
+
+      .dark .glass-card {
+        background: rgba(20, 20, 22, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .dark .text-slate-600 {
+        color: #9ca3af;
+      }
+
+      .dark .text-slate-500 {
+        color: #6b7280;
+      }
+
+      .dark .glass-card:hover {
+        box-shadow: 0 20px 40px rgba(23, 19, 236, 0.25);
+      }
+
+      .glass-morphism {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .dark .glass-morphism {
+        background: rgba(20, 20, 22, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      #themeToggle {
+        transition: background 0.3s ease;
+      }
     </style>
   </head>
-  <body
-    class="font-sans text-slate-800 gradient-bg transition-all duration-300"
-  >
+  <body class="font-sans gradient-bg text-slate-900 dark:text-white">
     <!-- Navigation -->
     <nav
       class="w-full z-50 p-6 flex items-center justify-between max-w-7xl mx-auto"
@@ -115,16 +167,23 @@
         <div
           class="w-8 h-8 bg-brand rounded-full flex items-center justify-center"
         >
-          <div class="w-4 h-4 bg-white rounded-full"></div>
+          <div
+            class="w-4 h-4 bg-white dark:bg-black rounded-full transition-colors"
+          ></div>
         </div>
-        <span class="text-xl font-bold tracking-tight text-slate-900"
-          >RetinaScan <span class="text-brand">AI</span></span
+        <span
+          class="text-xl font-bold tracking-tight text-slate-900 dark:text-white"
+        >
+          RetinaScan <span class="text-brand">AI</span></span
         >
       </div>
-      <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+      <div
+        class="hidden md:flex space-x-8 text-sm font-medium text-slate-600 dark:text-gray-300"
+      >
         <a
           href="{{ url_for('index') }}"
           class="hover:text-brand transition-colors"
+          style="padding-left: 55px"
           >Home</a
         >
         <a
@@ -138,76 +197,106 @@
           >Diagnostic View</a
         >
       </div>
-      <div>
+      <div class="flex items-center gap-4">
+        <!-- Dark Mode Toggle -->
+        <div
+          id="themeToggle"
+          class="relative w-20 h-9 bg-gradient-to-r from-yellow-200 to-slate-300 rounded-full cursor-pointer flex items-center px-1 transition-all duration-300 shadow-inner"
+        >
+          <div
+            id="toggleCircle"
+            class="w-8 h-8 bg-white dark:bg-[#111] rounded-full shadow-md flex items-center justify-center transition-all duration-300"
+          >
+            🌞
+          </div>
+        </div>
+
         <a
           href="{{ url_for('scanner') }}"
           class="bg-brand text-white px-6 py-2.5 rounded-eight text-sm font-semibold hover:shadow-lg transition-all inline-block"
-          >New Scan</a
         >
+          New Scan
+        </a>
       </div>
     </nav>
 
     <header class="py-8 px-6 text-center">
       <div class="max-w-4xl mx-auto">
         <div
-          class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2"
+          class="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-2"
         >
           SYSTEM / ANALYTICS / ENSEMBLE_V1.4
         </div>
         <h1
-          class="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4 leading-tight"
+          class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white transition-colors duration-300 ..."
         >
           Inside the Intelligence
           <span class="block text-brand text-lg mt-2 font-medium tracking-wide">
             RetinaScan AI Analytics Core
           </span>
         </h1>
-        <p class="text-lg text-slate-600 font-medium">
+        <p class="text-lg text-slate-600 dark:text-gray-300 font-medium">
           Exploring the deep learning foundations and rigorous performance
           benchmarks of RetinaScan AI.
         </p>
       </div>
     </header>
 
-    <section class="mb-12">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <section class="mb-12" style="margin: 20px">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Prediction -->
-        <div class="glass-card p-6 text-center">
-          <h4 class="text-sm text-slate-500">Prediction</h4>
+        <div
+          class="glass-card p-6 text-center flex flex-col justify-center min-h-[140px]"
+        >
+          <h4 class="text-sm text-slate-500 dark:text-gray-400">Prediction</h4>
           <div class="text-2xl font-bold text-brand mt-2">
-            {{ prediction if prediction else "No Data" }}
+            {{ prediction if prediction else "Scan retina to detect" }}
           </div>
         </div>
 
         <!-- Confidence -->
-        <div class="glass-card p-6 text-center">
-          <h4 class="text-sm text-slate-500">Confidence</h4>
+        <div
+          class="glass-card p-6 text-center flex flex-col justify-center min-h-[140px]"
+        >
+          <h4 class="text-sm text-slate-500 dark:text-gray-400">Confidence</h4>
           <div
             id="confidenceValue"
-            data-value="{{ confidence if confidence else 0 }}"
+            data-value="{{ confidence if confidence else -1 }}"
+            class="text-slate-800 dark:text-gray-300 font-semibold"
           >
-            0%
+            {{ confidence ~ "%" if confidence else "No scan yet" }}
+          </div>
+          <div
+            class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-2 mt-3"
+          >
+            <div
+              class="bg-brand h-2 rounded-full transition-all duration-700 {{ 'opacity-30' if not confidence else '' }}"
+              style="width: {{ confidence if confidence else 0 }}%"
+            ></div>
+          </div>
+        </div>
+        <!-- Severity -->
+        <div
+          class="glass-card p-6 text-center flex flex-col justify-center min-h-[140px]"
+        >
+          <h4 class="text-sm text-slate-500 dark:text-gray-400">
+            Severity Level
+          </h4>
+          <div
+            class="text-2xl font-bold mt-2 
+            {% if severity == 'None' %} text-green-600 
+            {% elif severity == 'Mild' or severity == 'Moderate' %} text-yellow-500 
+            {% else %} text-red-600 {% endif %}"
+          >
+            {{ severity if severity else "Awaiting scan" }}
           </div>
         </div>
 
-        <!-- Severity -->
-        <div class="glass-card p-6 text-center">
-          <h4 class="text-sm text-slate-500">Severity Level</h4>
-          <div class="text-2xl font-bold mt-2
-  {% if severity == 'None' %}
-    text-green-600
-  {% elif severity == 'Mild' or severity == 'Moderate' %}
-    text-yellow-600
-  {% else %}
-    text-red-600
-  {% endif %}
-">
-            {{ severity if severity else "--" }}
-        </div>
-
         <!-- Risk Level -->
-        <div class="glass-card p-6 text-center">
-          <h4 class="text-sm text-slate-500">Risk Level</h4>
+        <div
+          class="glass-card p-6 text-center flex flex-col justify-center min-h-[140px]"
+        >
+          <h4 class="text-sm text-slate-500 dark:text-gray-400">Risk Level</h4>
 
           <div class="mt-2">
             {% if risk == "Low" %}
@@ -231,21 +320,39 @@
               Critical
             </span>
             {% else %}
-            <span class="text-slate-400">--</span>
+            <span class="text-slate-400 dark:text-gray-500">--</span>
             {% endif %}
           </div>
         </div>
       </div>
     </section>
 
-    <div class="flex justify-center mt-4">
-      <div class="flex items-center gap-2 text-sm font-medium text-green-600">
-        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-        System Active • Model Ready
+    <div class="flex justify-center mt-6" style="margin: 20px">
+      <div class="glass-card px-6 py-4 flex items-center gap-6">
+        <!-- Status -->
+        <div
+          class="flex items-center gap-2 text-sm font-semibold {% if prediction %} text-green-600 {% else %} text-yellow-500 {% endif %}"
+        >
+          <span
+            class="w-2 h-2 rounded-full animate-pulse {% if prediction %} bg-green-500 {% else %} bg-yellow-400 {% endif %}"
+          ></span>
+          {{ "System Active" if prediction else "Idle Mode" }}
+        </div>
+
+        <!-- Divider -->
+        <div class="h-4 w-px bg-slate-300 dark:bg-gray-600"></div>
+
+        <!-- Model -->
+        <div class="text-sm text-slate-600 dark:text-gray-300">Model Ready</div>
+
+        <!-- Divider -->
+        <div class="h-4 w-px bg-slate-300 dark:bg-gray-600"></div>
+
+        <!-- Last Updated -->
+        <div class="text-sm text-slate-500 dark:text-gray-400">
+          {{ "Updated just now" if prediction else "No recent scan" }}
+        </div>
       </div>
-      <div class="text-center text-xs text-slate-400 mt-2">
-  Last Updated: {{ "Now" if prediction else "No recent scan" }}
-</div>
     </div>
 
     <main class="max-w-7xl mx-auto px-6 md:px-8 pb-24">
@@ -256,10 +363,10 @@
               <i class="fas fa-notes-medical"></i>
             </div>
             <div>
-              <h3 class="font-bold text-slate-800">
+              <h3 class="font-bold text-slate-800 dark:text-gray-400">
                 Medical Reference: Diabetic Retinopathy
               </h3>
-              <p class="text-slate-600 text-sm mt-1">
+              <p class="text-slate-600 dark:text-gray-400 text-sm mt-1">
                 Vessel segmentation analysis categorized across 5 severity
                 levels: Class 0 to Class 4.
               </p>
@@ -268,49 +375,65 @@
           <div
             class="glass-card rounded-eight p-6 flex flex-col justify-center"
           >
-            <h3 class="font-bold text-slate-800">Hybrid Feature Fusion</h3>
+            <h3 class="font-bold text-slate-800 dark:text-gray-400">
+              Hybrid Feature Fusion
+            </h3>
             <div class="text-2xl font-bold text-brand mt-2">32,818 VECTORS</div>
-            <p class="text-slate-500 text-xs mt-1">
+            <p class="text-slate-500 dark:text-gray-400 text-xs mt-1">
               Combined CNN Shape + GLCM Texture + LBP Pattern.
             </p>
           </div>
         </div>
       </section>
       {% if not prediction %}
-<div class="text-center py-12 text-slate-500">
-  <i class="fas fa-info-circle text-2xl mb-2"></i>
-  <p>No scan data available. Please perform a scan.</p>
-</div>
-{% endif %}
+      <div class="text-center py-12 text-slate-500 dark:text-gray-400">
+        <i class="fas fa-info-circle text-2xl mb-2"></i>
+        <p class="mb-4">No scan data available.</p>
+        <a
+          href="{{ url_for('scanner') }}"
+          class="bg-brand text-white px-5 py-2 rounded-eight text-sm"
+        >
+          Start First Scan
+        </a>
+      </div>
+      {% endif %}
 
       <section class="mb-20">
         <div class="flex items-center gap-4 mb-8">
           <div class="h-8 w-1 bg-brand rounded-full"></div>
-          <h2 class="text-2xl font-bold text-slate-800">Performance Metrics</h2>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-gray-400">
+            Performance Metrics
+          </h2>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Accuracy Chart Container -->
           <div class="glass-card rounded-eight p-6 flex flex-col items-center">
-            <h3 class="text-lg font-semibold mb-6 text-slate-700">
-              <i class="fas fa-chart-bar text-brand"></i> Accuracy Benchmarking
-            </h3>
-            <div
-              class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2"
+            <h3
+              class="text-lg font-semibold mb-6 text-slate-700 dark:text-gray-300"
             >
-              {% if cm_url %}
+              <i class="fas fa-chart-bar text-brand"></i> Model Accuracy
+            </h3>
+            <p class="text-xs text-slate-400 dark:text-gray-500 mt-1">
+              Based on validation dataset
+            </p>
+            <br />
+            <div
+              class="w-full h-[220px] flex items-center justify-center overflow-hidden rounded-md border border-slate-100 dark:border-gray-700 shadow-sm bg-white dark:bg-[#111111] p-2"
+            >
+              {% if accuracy_url %}
               <img
-                src="{{ cm_url }}"
-                alt="Model Accuracy Bar Chart"
-                class="w-full h-auto block"
+                class="max-h-full object-contain rounded-md"
+                src="{{ accuracy_url }}"
+                alt="Model Accuracy Chart"
               />
               {% else %}
               <div
-                class="flex flex-col items-center justify-center py-10 text-slate-400 text-sm"
+                class="flex flex-col items-center justify-center text-slate-400 dark:text-gray-500 text-sm"
               >
                 <div
-                  class="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin mb-2"
+                  class="w-6 h-6 border-2 border-brand border-t-transparent dark:border-white dark:border-t-transparent rounded-full animate-spin mb-2"
                 ></div>
-                Loading Model Data...
+                Loading analytics...
               </div>
               {% endif %}
             </div>
@@ -318,21 +441,30 @@
 
           <!-- confusion Matrix Chart Container -->
           <div class="glass-card rounded-eight p-6 flex flex-col items-center">
-            <h3 class="text-lg font-semibold mb-6 text-slate-700">
-              <i class="fas fa-border-all text-brand"></i> Error Matrix
-            </h3>
-            <div
-              class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2"
+            <h3
+              class="text-lg font-semibold mb-6 text-slate-700 dark:text-gray-300"
             >
-              {% if f1_url %}
+              <i class="fas fa-border-all text-brand"></i> Confusion Matrix
+            </h3>
+            <p class="text-xs text-slate-400 dark:text-gray-500 mt-1">
+              Based on validation dataset
+            </p>
+            <br />
+            <div
+              class="w-full h-[220px] flex items-center justify-center overflow-hidden rounded-md border border-slate-100 dark:border-gray-700 shadow-sm bg-white dark:bg-[#111111] p-2"
+            >
+              {% if cm_url %}
               <img
-                src="{{ f1_url }}"
-                alt="Normalized Confusion Matrix"
-                class="w-full h-auto block"
+                class="max-h-full object-contain rounded-md"
+                src="{{ cm_url }}"
+                alt="Confusion Matrix"
               />
               {% else %}
-              <div class="text-slate-500 text-sm py-10 text-center">
-                Awaiting Model Metadata...
+              <div
+                class="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-gray-500 text-sm"
+              >
+                <i class="fas fa-chart-line text-xl mb-2"></i>
+                <p>No analysis data available</p>
               </div>
               {% endif %}
             </div>
@@ -340,25 +472,90 @@
 
           <!-- Radar Chart Container -->
           <div class="glass-card rounded-eight p-6 flex flex-col items-center">
-            <h3 class="text-lg font-semibold mb-6 text-slate-700">
+            <h3
+              class="text-lg font-semibold mb-6 text-slate-700 dark:text-gray-300"
+            >
               <i class="fas fa-spider text-brand"></i> Distribution Profile
             </h3>
+            <p class="text-xs text-slate-400 dark:text-gray-500 mt-1">
+              Based on validation dataset
+            </p>
+            <br />
             <div
-              class="w-full h-auto overflow-hidden rounded-md border border-slate-100 shadow-sm bg-white p-2"
+              class="w-full h-[220px] flex items-center justify-center overflow-hidden rounded-md border border-slate-100 dark:border-gray-700 shadow-sm bg-white dark:bg-[#111111] p-2"
             >
               {% if radar_url %}
               <img
                 src="{{ radar_url }}"
                 alt="Model Radar Chart"
-                class="w-full h-auto block"
+                class="max-h-full object-contain rounded-md"
               />
               {% else %}
-              <div class="text-slate-500 text-sm py-10 text-center">
-                Awaiting Model Metadata...
+              <div
+                class="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-gray-500 text-sm"
+              >
+                <i class="fas fa-chart-line text-xl mb-2"></i>
+                <p>No analysis data available</p>
               </div>
               {% endif %}
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- 🗂 Scan History -->
+      <section class="mb-20">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="h-8 w-1 bg-brand rounded-full"></div>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-gray-400">
+            Recent Scans
+          </h2>
+        </div>
+
+        <div class="glass-card p-6">
+          {% if history and history|length > 0 %}
+          <div class="space-y-4">
+            {% for scan in history %}
+            <div
+              class="flex justify-between items-center border-b pb-3 last:border-none"
+            >
+              <!-- Left -->
+              <div>
+                <div class="font-semibold text-slate-800 dark:text-white">
+                  {{ scan.prediction }}
+                </div>
+                <div class="text-sm text-slate-500 dark:text-gray-400">
+                  Confidence: {{ scan.confidence }}%
+                </div>
+                <div class="text-xs text-slate-400 dark:text-gray-500 mt-1">
+                  {{ scan.timestamp if scan.timestamp else "Recently" }}
+                </div>
+              </div>
+
+              <!-- Right -->
+              <div class="flex gap-4 items-center">
+                <!-- Severity -->
+                <span
+                  class="text-sm font-medium {% if scan.severity == 'None' %} text-green-600 {% elif 'Class 1' in scan.severity or 'Class 2' in scan.severity %} text-yellow-600 {% else %} text-red-600 {% endif %}"
+                >
+                  {{ scan.severity }}
+                </span>
+
+                <!-- Risk -->
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-semibold {% if scan.risk == 'Low' %} bg-green-100 text-green-600 {% elif scan.risk == 'Moderate' %} bg-yellow-100 text-yellow-600 {% else %} bg-red-100 text-red-600 {% endif %}"
+                >
+                  {{ scan.risk }}
+                </span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center text-slate-400 dark:text-gray-500">
+            No scan history yet. Start by analyzing a retina image.
+          </div>
+          {% endif %}
         </div>
       </section>
 
@@ -373,7 +570,7 @@
     </main>
 
     <script>
-      document.querySelectorAll("a").forEach((link) => {
+      document.querySelectorAll("a[href^='/']").forEach((link) => {
         link.addEventListener("click", function (e) {
           if (this.href && !this.href.includes("#")) {
             e.preventDefault();
@@ -384,6 +581,52 @@
           }
         });
       });
+    </script>
+
+    <script>
+      const toggle = document.getElementById("themeToggle");
+      const circle = document.getElementById("toggleCircle");
+
+      function applyTheme(theme) {
+        if (!toggle || !circle) return;
+
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+
+          circle.style.transform = "translateX(40px)";
+          circle.textContent = "🌙";
+          circle.style.background = "#111";
+          circle.style.color = "#fff";
+
+          toggle.classList.remove("from-yellow-200", "to-slate-300");
+          toggle.classList.add("from-slate-700", "to-slate-900");
+        } else {
+          document.documentElement.classList.remove("dark");
+
+          circle.style.transform = "translateX(0px)";
+          circle.textContent = "🌞";
+          circle.style.background = "#fff";
+          circle.style.color = "#000";
+
+          toggle.classList.remove("from-slate-700", "to-slate-900");
+          toggle.classList.add("from-yellow-200", "to-slate-300");
+        }
+      }
+
+      // INIT
+      const savedTheme = localStorage.getItem("theme") || "light";
+      applyTheme(savedTheme);
+
+      // CLICK
+      if (toggle) {
+        toggle.addEventListener("click", () => {
+          const isDark = document.documentElement.classList.contains("dark");
+          const newTheme = isDark ? "light" : "dark";
+
+          localStorage.setItem("theme", newTheme);
+          applyTheme(newTheme);
+        });
+      }
     </script>
   </body>
 </html>

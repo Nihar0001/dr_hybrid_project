@@ -1,9 +1,6 @@
 import os
 import sys
-import time
-
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, session
- 
 from werkzeug.utils import secure_filename
 
 # --- make 'src' importable when app runs from app/ ---
@@ -42,7 +39,7 @@ def scanner():
         f.save(save_path)
 
         try:
-            pred, proba, heatmap_path, preprocessed_path = infer_image(save_path)
+            pred, proba, heatmap_path, *_ = infer_image(save_path)
 
             # Calculate confidence as percentage of predicted class
             confidence = float(proba[pred]) * 100
@@ -57,7 +54,6 @@ def scanner():
             else:
                 prediction_label = "Diabetic Retinopathy Detected"
                 severity_level = pred_class_name # e.g. 'Mild', 'Moderate', etc.
-                
                 if predicted_class == 1:
                     risk = "Mild"
                 elif predicted_class == 2:
@@ -67,15 +63,23 @@ def scanner():
                 else:
                     risk = "Critical"
 
-            session["last_result"] = {
+            # ✅ Create scan entry
+            scan_entry = {
                 "prediction": prediction_label,
                 "confidence": round(confidence, 1),
                 "severity": severity_level,
-                "risk": risk,   # ✅ ADD THIS LINE
-                "cm_url": url_for("outputs_file", filename="model_accuracy_bar_chart.png"),
-                "f1_url": url_for("outputs_file", filename="normalized_cm_votingclassifier.png"),
-                "radar_url": url_for("outputs_file", filename="model_radar_chart.png")
+                "risk": risk
             }
+            # ✅ Initialize history if not exists
+            if "scan_history" not in session:
+                session["scan_history"] = []
+            # ✅ Add latest scan to top
+            history = session["scan_history"]
+            history.insert(0, scan_entry)
+            # ✅ Keep only last 5 scans (optional)
+            session["scan_history"] = history[:5]
+            # ✅ Store latest separately (for main cards)
+            session["last_result"] = scan_entry
 
             context.update({
                 "pred": int(pred),
@@ -86,15 +90,9 @@ def scanner():
                 "pred_name": pred_class_name,
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
-              
-                "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path), t=time.time()),
-                "original_url": url_for("uploads_file", filename=os.path.basename(preprocessed_path), t=time.time()),
-                "uploaded_name": filename,
+                "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
                 "uploaded_url": url_for("uploads_file", filename=filename),
                 "risk": risk,
-
-              
-
             })
         except Exception as e:
             flash(f"Inference error: {e}")
@@ -105,11 +103,15 @@ def scanner():
 
 @app.route("/")
 def index():
+    session.clear()  # 🔥 clears history + last result
     return render_template("index.html")
 
 
 @app.route("/dashboard")
 def dashboard():
+    if "initialized" not in session:
+        session.clear()
+        session["initialized"] = True
     result = session.get("last_result", None)
 
     # Chart files
@@ -128,7 +130,9 @@ def dashboard():
         prediction=result.get("prediction") if result else None,
         confidence=result.get("confidence") if result else None,
         severity=result.get("severity") if result else None,
-        risk=result["risk"] if result else None,
+        risk=result.get("risk") if result else None,
+
+        history=session.get("scan_history", []),
 
         # 📊 Charts
         cm_url=url_for("outputs_file", filename=cm) if cm_exists else None,
