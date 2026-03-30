@@ -75,6 +75,7 @@ def scanner():
             if pred_index == 0:
                 prediction_label = "No Diabetic Retinopathy"
                 severity_level = "None"
+                severity_level = "Healthy"
                 risk = "Low"
 
             elif pred_index == 1:
@@ -158,8 +159,11 @@ def dashboard():
     # Chart files
     cm = "model_accuracy_bar_chart.png"
     f1 = "normalized_cm_votingclassifier.png"
+    accuracy = "model_accuracy_bar_chart.png"
+    cm = "normalized_cm_votingclassifier.png"
     radar = "model_radar_chart.png"
 
+    accuracy_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, accuracy))
     cm_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, cm))
     f1_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, f1))
     radar_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, radar))
