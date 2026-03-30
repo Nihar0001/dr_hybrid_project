@@ -12,6 +12,9 @@ uploads/*
 !uploads/.gitkeep
 outputs/*
 !outputs/.gitkeep
+!outputs/model_accuracy_bar_chart.png
+!outputs/model_radar_chart.png
+!outputs/normalized_cm_votingclassifier.png
 data/*
 !data/*.csv
 !data/.gitkeep
