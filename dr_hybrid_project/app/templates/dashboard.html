@@ -534,18 +534,15 @@
 
               <!-- Right -->
               <div class="flex gap-4 items-center">
-                <!-- Severity -->
+                <!-- Severity Badge (The Glowing Cell) -->
                 <span
-                  class="text-sm font-medium {% if scan.severity == 'None' %} text-green-600 {% elif 'Class 1' in scan.severity or 'Class 2' in scan.severity %} text-yellow-600 {% else %} text-red-600 {% endif %}"
+                  class="px-4 py-1.5 rounded-full text-xs font-bold shadow-sm transition-all
+                  {% if scan.severity == 'Healthy' %} bg-green-100 text-green-700 border border-green-200
+                  {% elif scan.severity == 'Mild' %} bg-yellow-100 text-yellow-700 border border-yellow-200
+                  {% elif scan.severity == 'Moderate' %} bg-orange-100 text-orange-700 border border-orange-200
+                  {% else %} bg-red-600 text-white shadow-red-200/50 {% endif %}"
                 >
                   {{ scan.severity }}
-                </span>
-
-                <!-- Risk -->
-                <span
-                  class="px-3 py-1 rounded-full text-xs font-semibold {% if scan.risk == 'Low' %} bg-green-100 text-green-600 {% elif scan.risk == 'Moderate' %} bg-yellow-100 text-yellow-600 {% else %} bg-red-100 text-red-600 {% endif %}"
-                >
-                  {{ scan.risk }}
                 </span>
               </div>
             </div>
