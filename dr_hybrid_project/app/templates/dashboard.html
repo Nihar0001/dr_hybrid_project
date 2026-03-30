@@ -270,9 +270,9 @@
             class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-2 mt-3"
           >
             <div
-              class="bg-brand h-2 rounded-full transition-all duration-700 {{ 'opacity-30' if not confidence else '' }}"
-              style="width: {{ confidence if confidence else 0 }}%"
-            ></div>
+              class="bg-brand h-2 rounded-full transition-all duration-700 dynamic-style {{ 'opacity-30' if not confidence else '' }}"
+              data-width="{{ confidence if confidence else 0 }}%">
+            </div>
           </div>
         </div>
         <!-- Severity -->
@@ -627,6 +627,17 @@
           applyTheme(newTheme);
         });
       }
+    </script>
+    <script>
+      // Apply data-driven styles once page is ready
+      function applyDynamicStyles() {
+          document.querySelectorAll('.dynamic-style').forEach(el => {
+              if (el.dataset.width) el.style.width = el.dataset.width;
+              if (el.dataset.bg) el.style.background = el.dataset.bg;
+          });
+      }
+      document.addEventListener("DOMContentLoaded", applyDynamicStyles);
+      window.addEventListener('load', applyDynamicStyles);
     </script>
   </body>
 </html>

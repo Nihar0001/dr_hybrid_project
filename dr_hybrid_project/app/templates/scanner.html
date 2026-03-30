@@ -8,8 +8,9 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">
-            if (localStorage.getItem("theme") === "dark") {
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      if (localStorage.getItem("theme") === "dark") {
         document.documentElement.classList.add("dark");
       }
     </script>
@@ -301,8 +302,9 @@
   <!-- Confidence Bar -->
 <div class="w-full h-3 bg-slate-200 dark:bg-[#222] rounded-full mt-4 overflow-hidden">
   <div 
-    class="h-full rounded-full transition-all duration-700"
-    style="width: {{ confidence|float }}%; background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);">
+    class="h-full rounded-full transition-all duration-700 dynamic-style"
+    data-width="{{ confidence|float }}%"
+    data-bg="linear-gradient(90deg, #22c55e, #eab308, #ef4444)">
   </div>
 </div>
 
@@ -320,75 +322,78 @@
   <!-- Description -->
   <div class="mt-4 text-left space-y-3">
 
-    {% if pred == 0 %}
-  {% set width = '20%' %}
-  {% set color = '#22c55e' %}
-{% elif 'Mild' in pred_name %}
-  {% set width = '40%' %}
-  {% set color = '#eab308' %}
-{% elif 'Moderate' in pred_name %}
-  {% set width = '70%' %}
-  {% set color = '#f97316' %}
-{% else %}
-  {% set width = '100%' %}
-  {% set color = '#ef4444' %}
-{% endif %}
+      {% if pred is none %}
+        {% set width = '0%' %}
+        {% set color = 'transparent' %}
+      {% elif pred == 0 %}
+        {% set width = '20%' %}
+        {% set color = '#22c55e' %}
+      {% elif 'Mild' in pred_name %}
+        {% set width = '40%' %}
+        {% set color = '#eab308' %}
+      {% elif 'Moderate' in pred_name %}
+        {% set width = '70%' %}
+        {% set color = '#f97316' %}
+      {% else %}
+        {% set width = '100%' %}
+        {% set color = '#ef4444' %}
+      {% endif %}
 
-  <!-- Severity -->
-  <div class="flex items-center justify-between text-sm">
-    <span class="text-slate-500 dark:text-slate-400">Severity Level</span>
+      <!-- Severity -->
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-slate-500 dark:text-slate-400">Severity Level</span>
+        <span class="font-semibold 
+          {% if severity == 'None' %} text-green-600 dark:text-green-400 
+          {% elif severity == 'Mild' %} text-yellow-500 
+          {% elif severity == 'Moderate' %} text-orange-500 
+          {% else %} text-red-500 {% endif %}">
+          {{ severity if severity else "Awaiting scan" }}
+        </span>
+      </div>
 
-<div class="w-full h-2 bg-slate-200 dark:bg-[#222] rounded-full mt-2">
-  <div 
-    class="h-full rounded-full"
-    style="width: {{ width }}; background: {{ color }};">
-  </div>
-</div>
-</div>
+      <div class="w-full h-2 bg-slate-200 dark:bg-[#222] rounded-full mt-2 overflow-hidden">
+        <div 
+          class="h-full rounded-full transition-all duration-1000 dynamic-style"
+          data-width="{{ width }}" 
+          data-bg="{{ color }}">
+        </div>
+      </div>
+    </div>
 
-    {% if pred == 0 %}
-      <span class="font-semibold text-green-600 dark:text-green-400">Low</span>
-    {% elif 'Mild' in pred_name %}
-      <span class="font-semibold text-yellow-500">Mild</span>
-    {% elif 'Moderate' in pred_name %}
-      <span class="font-semibold text-orange-500">Moderate</span>
-    {% else %}
-      <span class="font-semibold text-red-500">High</span>
-    {% endif %}
-  </div>
-
-  <!-- Risk Indicator -->
-  <div class="flex items-center justify-between text-sm">
-    <span class="text-slate-500 dark:text-slate-400">Risk Assessment</span>
-
-    {% if pred == 0 %}
-      <span class="text-green-600 dark:text-green-400 font-medium">No immediate risk</span>
-    {% else %}
-      <span class="text-red-500 font-medium">Potential DR detected</span>
-    {% endif %}
-  </div>
+    <!-- Risk Indicator -->
+    <div class="flex items-center justify-between text-sm">
+      <span class="text-slate-500 dark:text-slate-400">Risk Assessment</span>
+      <span class="font-medium 
+        {% if risk == 'Low' %} text-green-600 dark:text-green-400 
+        {% elif risk == 'Mild' %} text-yellow-500 
+        {% elif risk == 'Moderate' %} text-orange-500 
+        {% elif risk == 'High' or risk == 'Critical' %} text-red-500 
+        {% else %} text-slate-400 {% endif %}">
+        {{ risk if risk else "No immediate risk" }}
+      </span>
+    </div>
 
   <!-- Recommendation -->
   <div class="flex items-start justify-between text-sm">
     <span class="text-slate-500 dark:text-slate-400">Recommendation</span>
 
-    {% if pred == 0 %}
-      <span class="text-right text-green-600 dark:text-green-400 font-medium">
+    <span class="text-right font-medium
+      {% if severity == 'None' %} text-green-600 dark:text-green-400 
+      {% elif severity == 'Mild' %} text-yellow-500 
+      {% elif severity == 'Moderate' %} text-orange-500 
+      {% else %} text-red-500 {% endif %}">
+      {% if severity == 'None' %}
         Routine check-up recommended
-      </span>
-    {% elif 'Mild' in pred_name %}
-      <span class="text-right text-yellow-500 font-medium">
+      {% elif severity == 'Mild' %}
         Monitor regularly and consult specialist
-      </span>
-    {% elif 'Moderate' in pred_name %}
-      <span class="text-right text-orange-500 font-medium">
+      {% elif severity == 'Moderate' %}
         Clinical evaluation advised soon
-      </span>
-    {% else %}
-      <span class="text-right text-red-500 font-medium">
+      {% elif severity %}
         Immediate medical attention required
-      </span>
-    {% endif %}
+      {% else %}
+        Awaiting analysis...
+      {% endif %}
+    </span>
   </div>
 
   <!-- Original Description -->
@@ -401,20 +406,6 @@
 </div>
 
 </div>
-              {% if pred == 0 %}
-              <div
-                class="inline-flex items-center gap-2 mt-4 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold border border-green-100"
-              >
-                <i class="fas fa-check-circle"></i> No signs of DR detected
-              </div>
-              {% else %}
-              <div
-                class="inline-flex items-center gap-2 mt-4 bg-amber-50 text-amber-700 px-4 py-2 rounded-full text-sm font-semibold border border-amber-100"
-              >
-                <i class="fas fa-exclamation-triangle"></i> Review Advised
-              </div>
-              <p class="text-sm text-slate-600 mt-2">{{ description }}</p>
-              {% endif %}
             </div>
           </div>
           {% else %}
@@ -511,6 +502,18 @@
         // Disable further clicks
         document.body.style.pointerEvents = "none";
       }
+    </script>
+    <script>
+      // Apply data-driven styles once page is ready
+      function applyDynamicStyles() {
+          document.querySelectorAll('.dynamic-style').forEach(el => {
+              if (el.dataset.width) el.style.width = el.dataset.width;
+              if (el.dataset.bg) el.style.background = el.dataset.bg;
+          });
+      }
+      document.addEventListener("DOMContentLoaded", applyDynamicStyles);
+      // Also apply for dynamic updates if any
+      window.addEventListener('load', applyDynamicStyles);
     </script>
   </body>
 </html>

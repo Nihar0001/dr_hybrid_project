@@ -21,7 +21,13 @@ def allowed_file(filename):
 
 @app.route("/scanner", methods=["GET", "POST"])
 def scanner():
-    context = {}
+    context = {
+        "pred": None,
+        "severity": None,
+        "risk": None,
+        "prediction_label": None,
+        "confidence": None,
+    }
     if request.method == "POST":
         if "file" not in request.files:
             flash("No file uploaded.")
