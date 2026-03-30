@@ -53,15 +53,19 @@ def scanner():
             if predicted_class == 0:
                 prediction_label = "No Diabetic Retinopathy Detected"
                 severity_level = "None"
+                risk = "Low"
             else:
                 prediction_label = "Diabetic Retinopathy Detected"
-                severity_level = f"Class {predicted_class}"
-            if predicted_class == 0:
-                    risk = "Low"
-            elif predicted_class <= 2:
+                severity_level = pred_class_name # e.g. 'Mild', 'Moderate', etc.
+                
+                if predicted_class == 1:
+                    risk = "Mild"
+                elif predicted_class == 2:
                     risk = "Moderate"
-            else:
+                elif predicted_class == 3:
                     risk = "High"
+                else:
+                    risk = "Critical"
 
             session["last_result"] = {
                 "prediction": prediction_label,
