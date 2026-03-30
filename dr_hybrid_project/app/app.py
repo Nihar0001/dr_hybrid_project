@@ -21,13 +21,12 @@ def allowed_file(filename):
 
 @app.route("/scanner", methods=["GET", "POST"])
 def scanner():
-    context = {
+    context = {        
         "pred": None,
         "severity": None,
         "risk": None,
         "prediction_label": None,
-        "confidence": None,
-    }
+        "confidence": None,}
     if request.method == "POST":
         if "file" not in request.files:
             flash("No file uploaded.")
@@ -47,53 +46,89 @@ def scanner():
         try:
             pred, proba, heatmap_path, *_ = infer_image(save_path)
 
-            # Calculate confidence as percentage of predicted class
-            confidence = float(proba[pred]) * 100
-            pred_class_name = config.CLASS_NAMES[int(pred)]
-            pred_description = config.CLASS_DESCRIPTIONS[int(pred)]
+            import numpy as np
+            
+            proba = np.array(proba)
+            
+            pred_index = int(np.argmax(proba))
+            confidence = float(proba[pred_index]) * 100
+            
+            # 🔥 SECOND BEST CLASS (VERY IMPORTANT)
+            second_index = int(np.argsort(proba)[-2])
+            second_conf = float(proba[second_index]) * 100
+            
+            # 🔥 DECISION CORRECTION LOGIC
+            if abs(proba[pred_index] - proba[second_index]) < 0.05:
+                # If close → pick higher severity (safer for medical use)
+                pred_index = max(pred_index, second_index)
+                confidence = float(proba[pred_index]) * 100
 
-            predicted_class = int(pred)
-            if predicted_class == 0:
-                prediction_label = "No Diabetic Retinopathy Detected"
-                severity_level = "Healthy"
+            # Standardized class names
+            classes = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
+            pred_name = classes[pred_index]
+
+            # Description (keep yours if needed)
+            pred_description = config.CLASS_DESCRIPTIONS[pred_index]
+
+            # predicted_class = int(pred)
+            # 🔥 Clean label mapping
+            if pred_index == 0:
+                prediction_label = "No Diabetic Retinopathy"
+                severity_level = "None"
                 risk = "Low"
-            else:
-                prediction_label = "Diabetic Retinopathy Detected"
-                severity_level = pred_class_name # e.g. 'Mild', 'Moderate', etc.
-                if predicted_class == 1:
-                    risk = "Mild"
-                elif predicted_class == 2:
-                    risk = "Moderate"
-                elif predicted_class == 3:
-                    risk = "High"
-                else:
-                    risk = "Critical"
+
+            elif pred_index == 1:
+                prediction_label = "Mild DR"
+                severity_level = "Class 1"
+                risk = "Moderate"
+
+            elif pred_index == 2:
+                prediction_label = "Moderate DR"
+                severity_level = "Class 2"
+                risk = "Moderate"
+
+            elif pred_index == 3:
+                prediction_label = "Severe DR"
+                severity_level = "Severe"
+                risk = "High"
+
+            elif pred_index == 4:
+                prediction_label = "Proliferative DR"
+                severity_level = "Critical"
+                risk = "High"
+                
+            # 🧠 Confidence threshold safeguard
+            if confidence < 50:
+                prediction_label += " (Low Confidence)"
 
             # ✅ Create scan entry
+
+            from datetime import datetime
             scan_entry = {
                 "prediction": prediction_label,
                 "confidence": round(confidence, 1),
                 "severity": severity_level,
-                "risk": risk
+                "risk": risk,
+                "timestamp": datetime.now().strftime("%d %b %H:%M")
             }
             # ✅ Initialize history if not exists
             if "scan_history" not in session:
                 session["scan_history"] = []
             # ✅ Add latest scan to top
-            history = session["scan_history"]
+            history = session.get("scan_history", [])
             history.insert(0, scan_entry)
             # ✅ Keep only last 5 scans (optional)
-            session["scan_history"] = history[:5]
+            session["scan_history"] = history[:10]
             # ✅ Store latest separately (for main cards)
             session["last_result"] = scan_entry
+            session.modified = True
 
             context.update({
-                "pred": int(pred),
-                "prediction_label": prediction_label,
+                "pred": pred_index,
                 "severity": severity_level,
                 "confidence": round(confidence, 1),
                 "description": pred_description,
-                "pred_name": pred_class_name,
+                "pred_name": pred_name,
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
                 "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
@@ -103,48 +138,57 @@ def scanner():
         except Exception as e:
             flash(f"Inference error: {e}")
             return redirect(url_for("scanner"))
+            
 
     return render_template("scanner.html", **context)
 
 
 @app.route("/")
 def index():
-    session.clear()  # 🔥 clears history + last result
+    session.clear()  # clears history + last result
     return render_template("index.html")
 
 
 @app.route("/dashboard")
 def dashboard():
     if "initialized" not in session:
-        session.clear()
         session["initialized"] = True
     result = session.get("last_result", None)
 
     # Chart files
-    accuracy = "model_accuracy_bar_chart.png"
-    cm = "normalized_cm_votingclassifier.png"
+    cm = "model_accuracy_bar_chart.png"
+    f1 = "normalized_cm_votingclassifier.png"
     radar = "model_radar_chart.png"
 
-    accuracy_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, accuracy))
     cm_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, cm))
+    f1_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, f1))
     radar_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, radar))
+
+    history = session.get("scan_history", [])
+
+    healthy_count = sum(
+        1 for h in history 
+        if h.get("severity") == "None"
+    )
+
+    high_risk_count = sum(
+        1 for h in history 
+        if h.get("severity") in ["Severe", "Critical"]
+    )
 
     return render_template(
         "dashboard.html",
-
-        # 🔥 Dynamic scan data
-        prediction=result.get("prediction") if result else None,
-        confidence=result.get("confidence") if result else None,
-        severity=result.get("severity") if result else None,
-        risk=result.get("risk") if result else None,
-
-        history=session.get("scan_history", []),
-
-        # 📊 Charts
-        accuracy_url=url_for("outputs_file", filename=accuracy) if accuracy_exists else None,
+        prediction=result["prediction"] if result else None,
+        confidence=result["confidence"] if result else None,
+        severity=result["severity"] if result else None,
+        risk=result["risk"] if result else None,
+        history=history,
+        healthy_count=healthy_count,
+        high_risk_count=high_risk_count,
+        accuracy_url=url_for("outputs_file", filename=f1) if f1_exists else None,
         cm_url=url_for("outputs_file", filename=cm) if cm_exists else None,
         radar_url=url_for("outputs_file", filename=radar) if radar_exists else None,
-    )
+        )
 
 @app.route("/outputs/<path:filename>")
 def outputs_file(filename):
