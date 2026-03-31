@@ -121,7 +121,7 @@ def scanner():
             history = session.get("scan_history", [])
             history.insert(0, scan_entry)
             # ✅ Keep only last 5 scans (optional)
-            session["scan_history"] = history[:10]
+            session["scan_history"] = history
             # ✅ Store latest separately (for main cards)
             session["last_result"] = scan_entry
             session.modified = True
@@ -159,6 +159,50 @@ def dashboard():
     if "initialized" not in session:
         session["initialized"] = True
     history = session.get("scan_history", []) or []
+    total_scans = len(history)
+
+    # 🔍 Search
+    search_query = request.args.get("search", "").lower()
+
+    # 🎯 Filter
+    filter_risk = request.args.get("risk", "all")
+
+    # 🔽 Sort
+    sort_by = request.args.get("sort", "latest")
+
+    filtered_history = history
+
+    # Apply search
+    if search_query:
+        filtered_history = [
+            h for h in filtered_history
+            if search_query in h.get("prediction", "").lower()
+        ]
+
+    # Apply filter
+    if filter_risk != "all":
+        filtered_history = [
+            h for h in filtered_history
+            if h.get("risk") == filter_risk
+        ]
+
+    # Apply sorting
+    if sort_by == "oldest":
+        filtered_history = list(reversed(filtered_history))
+    elif sort_by == "confidence":
+        filtered_history = sorted(filtered_history, key=lambda x: x.get("confidence", 0), reverse=True)
+
+    # 📄 Pagination
+    page = request.args.get("page", 1, type=int)
+    per_page = 5
+
+    total = len(filtered_history)
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    paginated_history = filtered_history[start:end]
+
+    total_pages = (total + per_page - 1) // per_page
     # result = session.get("last_result", {}) or {}   
     result = session.get("last_result") or {}
 
@@ -205,7 +249,13 @@ def dashboard():
         confidence=result.get("confidence"),
         severity=result.get("severity"),
         risk=result.get("risk"),
-        history=history,
+        history=paginated_history,
+        total_scans=total_scans,
+        search_query=search_query,
+        filter_risk=filter_risk,
+        sort_by=sort_by,
+        page=page,
+        total_pages=total_pages,
         healthy_count=healthy_count,
         moderate_count=moderate_count,
         high_risk_count=high_risk_count,
@@ -217,6 +267,55 @@ def dashboard():
         radar_url=url_for("outputs_file", filename=radar) if radar_exists else None,
         f1_url=url_for("outputs_file", filename=f1) if f1_exists else None,
         )
+
+@app.route("/recent-scans")
+def recent_scans():
+    history = session.get("scan_history", []) or []
+    total_scans = len(history)
+
+    search_query = request.args.get("search", "").lower()
+    filter_risk = request.args.get("risk", "all")
+    sort_by = request.args.get("sort", "latest")
+
+    filtered_history = history
+
+    if search_query:
+        filtered_history = [
+            h for h in filtered_history
+            if search_query in h.get("prediction", "").lower()
+        ]
+
+    if filter_risk != "all":
+        filtered_history = [
+            h for h in filtered_history
+            if h.get("risk") == filter_risk
+        ]
+
+    if sort_by == "oldest":
+        filtered_history = list(reversed(filtered_history))
+    elif sort_by == "confidence":
+        filtered_history = sorted(filtered_history, key=lambda x: x.get("confidence", 0), reverse=True)
+
+    # Pagination
+    page = request.args.get("page", 1, type=int)
+    per_page = 5
+
+    total = len(filtered_history)
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    paginated_history = filtered_history[start:end]
+    total_pages = (total + per_page - 1) // per_page
+
+    return render_template(
+        "_recent_scans.html",
+        history=paginated_history,
+        page=page,
+        total_pages=total_pages,
+        search_query=search_query,
+        filter_risk=filter_risk,
+        sort_by=sort_by,
+    )
 
 @app.route("/outputs/<path:filename>")
 def outputs_file(filename):

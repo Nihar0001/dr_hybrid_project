@@ -186,6 +186,7 @@
       </div>
       <div
         class="hidden md:flex space-x-8 text-sm font-medium text-slate-600 dark:text-gray-300"
+        style="position: relative"
       >
         <a
           href="{{ url_for('index') }}"
@@ -197,11 +198,6 @@
           href="{{ url_for('dashboard') }}"
           class="hover:text-brand transition-colors active"
           >Dashboard</a
-        >
-        <a
-          href="{{ url_for('scanner') }}"
-          class="hover:text-brand transition-colors"
-          >Diagnostic View</a
         >
       </div>
       <div class="flex items-center gap-4">
@@ -253,7 +249,7 @@
     >
       <div class="glass-card p-5">
         <p class="text-sm text-slate-500 dark:text-gray-400">Total Scans</p>
-        <h3 class="text-2xl font-bold text-brand mt-1">{{ history|length }}</h3>
+        <h3 class="text-2xl font-bold text-brand mt-1">{{ total_scans }}</h3>
       </div>
 
       <div class="glass-card p-5">
@@ -393,35 +389,6 @@
     </div>
 
     <main class="max-w-7xl mx-auto px-6 md:px-8 pb-24">
-      <section class="mb-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="glass-card rounded-eight p-6 flex gap-4 items-center">
-            <div class="text-4xl text-brand">
-              <i class="fas fa-notes-medical"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-slate-800 dark:text-gray-400">
-                Medical Reference: Diabetic Retinopathy
-              </h3>
-              <p class="text-slate-600 dark:text-gray-400 text-sm mt-1">
-                Vessel segmentation analysis categorized across 5 severity
-                levels: Class 0 to Class 4.
-              </p>
-            </div>
-          </div>
-          <div
-            class="glass-card rounded-eight p-6 flex flex-col justify-center"
-          >
-            <h3 class="font-bold text-slate-800 dark:text-gray-400">
-              Hybrid Feature Fusion
-            </h3>
-            <div class="text-2xl font-bold text-brand mt-2">32,818 VECTORS</div>
-            <p class="text-slate-500 dark:text-gray-400 text-xs mt-1">
-              Combined CNN Shape + GLCM Texture + LBP Pattern.
-            </p>
-          </div>
-        </div>
-      </section>
       {% if not prediction %}
       <div class="text-center py-12 text-slate-500 dark:text-gray-400">
         <i class="fas fa-info-circle text-2xl mb-2"></i>
@@ -631,55 +598,73 @@
             Recent Scans
           </h2>
         </div>
+        <!-- 🔍 Filter + Search + Sort -->
+<div class="flex flex-wrap gap-3 mb-4">
 
-        <div class="glass-card p-6">
-          {% if history and history|length > 0 %}
-          <div class="space-y-4">
-            {% for scan in history %}
-            <div
-              class="flex justify-between items-center border-b pb-3 last:border-none"
-            >
-              <!-- Left -->
-              <div>
-                <div class="font-semibold text-slate-800 dark:text-white">
-                  {{ scan.prediction }}
-                </div>
-                <div class="text-sm text-slate-500 dark:text-gray-400">
-                  Confidence: {{ scan.confidence }}%
-                </div>
-                <div class="text-xs text-slate-400 dark:text-gray-500 mt-1">
-                  {{ scan.timestamp if scan.timestamp else "Recently" }}
-                </div>
-              </div>
+  <!-- Search -->
+  <input type="text" name="search" placeholder="Search prediction..."
+    value="{{ search_query }}"
+    class="px-3 py-2 rounded bg-slate-100 dark:bg-gray-700 text-sm"
+    onkeydown="if(event.key==='Enter'){applyFilters()}">
 
-              <!-- Right -->
-              <div class="flex gap-4 items-center">
-                <!-- Severity -->
-                <span
-                  class="text-sm font-medium {% if scan.risk == 'Low' %} text-green-600 {% elif scan.risk == 'Moderate' %} text-yellow-600 {% else %} text-red-600 {% endif %}"
-                >
-                  {{ scan.severity }}
-                </span>
+  <!-- Filter -->
+  <select id="riskFilter" class="px-3 py-2 rounded bg-slate-100 dark:bg-gray-700 text-sm">
+    <option value="all" {{ 'selected' if filter_risk=='all' else '' }}>All</option>
+    <option value="Low" {{ 'selected' if filter_risk=='Low' else '' }}>Low</option>
+    <option value="Moderate" {{ 'selected' if filter_risk=='Moderate' else '' }}>Moderate</option>
+    <option value="High" {{ 'selected' if filter_risk=='High' else '' }}>High</option>
+  </select>
 
-                <!-- Risk -->
-                <span
-                  class="px-3 py-1 rounded-full text-xs font-semibold {% if scan.risk == 'Low' %} bg-green-100 text-green-600 {% elif scan.risk == 'Moderate' %} bg-yellow-100 text-yellow-600 {% else %} bg-red-100 text-red-600 {% endif %}"
-                >
-                  {{ scan.risk }}
-                </span>
-              </div>
+  <!-- Sort -->
+  <select id="sortBy" class="px-3 py-2 rounded bg-slate-100 dark:bg-gray-700 text-sm">
+    <option value="latest" {{ 'selected' if sort_by=='latest' else '' }}>Latest</option>
+    <option value="oldest" {{ 'selected' if sort_by=='oldest' else '' }}>Oldest</option>
+    <option value="confidence" {{ 'selected' if sort_by=='confidence' else '' }}>Confidence</option>
+  </select>
+
+  <button onclick="applyFilters()" class="bg-brand text-white px-4 py-2 rounded text-sm">
+    Apply
+  </button>
+
+</div>
+
+<div id="recentScansContainer">
+  {% include "_recent_scans.html" %}
+</div>
+
+</section>
+
+      <section class="mb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="glass-card rounded-eight p-6 flex gap-4 items-center">
+            <div class="text-4xl text-brand">
+              <i class="fas fa-notes-medical"></i>
             </div>
-            {% endfor %}
+            <div>
+              <h3 class="font-bold text-slate-800 dark:text-gray-400">
+                Medical Reference: Diabetic Retinopathy
+              </h3>
+              <p class="text-slate-600 dark:text-gray-400 text-sm mt-1">
+                Vessel segmentation analysis categorized across 5 severity
+                levels: Class 0 to Class 4.
+              </p>
+            </div>
           </div>
-          {% else %}
-          <div class="text-center text-slate-400 dark:text-gray-500">
-            No scan history yet. Start by analyzing a retina image.
+          <div
+            class="glass-card rounded-eight p-6 flex flex-col justify-center"
+          >
+            <h3 class="font-bold text-slate-800 dark:text-gray-400">
+              Hybrid Feature Fusion
+            </h3>
+            <div class="text-2xl font-bold text-brand mt-2">32,818 VECTORS</div>
+            <p class="text-slate-500 dark:text-gray-400 text-xs mt-1">
+              Combined CNN Shape + GLCM Texture + LBP Pattern.
+            </p>
           </div>
-          {% endif %}
         </div>
       </section>
 
-      <div class="flex justify-end">
+      <div class="flex justify-center">
         <a
           href="{{ url_for('scanner') }}"
           class="bg-brand text-white px-8 py-4 rounded-eight font-bold shadow-lg hover:bg-brand/90 transition-all inline-block"
@@ -825,5 +810,34 @@
         });
       }
     </script>
+
+<script>
+async function loadScans(params = {}) {
+  const url = new URL("/recent-scans", window.location.origin);
+
+  Object.keys(params).forEach(key => {
+    url.searchParams.set(key, params[key]);
+  });
+
+  const res = await fetch(url);
+  const html = await res.text();
+
+  document.getElementById("recentScansContainer").innerHTML = html;
+}
+
+// Apply filters without reload
+function applyFilters() {
+  const search = document.querySelector("input[name='search']").value;
+  const risk = document.getElementById("riskFilter").value;
+  const sort = document.getElementById("sortBy").value;
+
+  loadScans({
+    search: search,
+    risk: risk,
+    sort: sort,
+    page: 1
+  });
+}
+</script>
   </body>
 </html>
