@@ -250,7 +250,6 @@ def dashboard():
         severity=result.get("severity"),
         risk=result.get("risk"),
         history=paginated_history,
-        total_scans=total_scans,
         search_query=search_query,
         filter_risk=filter_risk,
         sort_by=sort_by,
