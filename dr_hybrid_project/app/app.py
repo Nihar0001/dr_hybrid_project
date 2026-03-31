@@ -163,11 +163,11 @@ def dashboard():
     result = session.get("last_result") or {}
 
     # Chart files
-    cm = "model_accuracy_bar_chart.png"
-    f1 = "normalized_cm_votingclassifier.png"
+    # cm = "model_accuracy_bar_chart.png"
     accuracy = "model_accuracy_bar_chart.png"
     cm = "normalized_cm_votingclassifier.png"
     radar = "model_radar_chart.png"
+    f1 = "normalized_cm_votingclassifier.png"
 
     accuracy_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, accuracy))
     cm_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, cm))
@@ -212,9 +212,10 @@ def dashboard():
         healthy_percent=healthy_percent,
         moderate_percent=moderate_percent,
         high_percent=high_percent,
-        accuracy_url=url_for("outputs_file", filename=f1) if f1_exists else None,
+        accuracy_url=url_for("outputs_file", filename=accuracy) if accuracy_exists else None,
         cm_url=url_for("outputs_file", filename=cm) if cm_exists else None,
         radar_url=url_for("outputs_file", filename=radar) if radar_exists else None,
+        f1_url=url_for("outputs_file", filename=f1) if f1_exists else None,
         )
 
 @app.route("/outputs/<path:filename>")
