@@ -249,7 +249,7 @@
     </header>
 
     <div
-      class="max-w-7xl mx-auto px-6 mb-10 grid grid-cols-1 md:grid-cols-4 gap-6"
+      class="max-w-7xl mx-auto px-6 mb-10 grid grid-cols-1 md:grid-cols-5 gap-6"
     >
       <div class="glass-card p-5">
         <p class="text-sm text-slate-500 dark:text-gray-400">Total Scans</p>
@@ -264,7 +264,14 @@
       </div>
 
       <div class="glass-card p-5">
-        <p class="text-sm text-slate-500 dark:text-gray-400">High Risk</p>
+        <p class="text-sm text-slate-500 dark:text-gray-400">Moderate Risk</p>
+        <h3 class="text-2xl font-bold text-yellow-500 mt-1">
+          {{ moderate_count }}
+        </h3>
+      </div>
+
+      <div class="glass-card p-5">
+        <p class="text-sm text-slate-500 dark:text-gray-400">Severe Cases</p>
         <h3 class="text-2xl font-bold text-red-500 mt-1">
           {{ high_risk_count }}
         </h3>
@@ -428,10 +435,93 @@
       </div>
       {% endif %}
 
+      <!-- 📊 Risk Distribution Bars -->
+      <section class="mb-20">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="h-8 w-1 bg-brand rounded-full"></div>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
+            Risk Distribution
+          </h2>
+        </div>
+
+        <div class="glass-card p-6 space-y-5">
+          <!-- Healthy -->
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span>Healthy</span>
+              <span>{{ healthy_percent }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                class="bg-green-500 h-3 rounded-full"
+                style="width: {{ healthy_percent }}%"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Moderate -->
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span>Moderate</span>
+              <span>{{ moderate_percent }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                class="bg-yellow-500 h-3 rounded-full"
+                style="width: {{ moderate_percent }}%"
+              ></div>
+            </div>
+          </div>
+
+          <!-- High -->
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span>High</span>
+              <span>{{ high_percent }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                class="bg-red-500 h-3 rounded-full"
+                style="width: {{ high_percent }}%"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-20">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="h-8 w-1 bg-brand rounded-full"></div>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
+            Risk Analytics
+          </h2>
+        </div>
+
+        <!-- 🔥 TWO CHARTS SIDE BY SIDE -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- 🥧 Pie Chart -->
+          <div class="glass-card p-6">
+            <h3 class="text-lg font-semibold mb-4">Risk Distribution</h3>
+            <div class="w-full flex justify-center">
+              <canvas
+                id="riskPieChart"
+                class="max-w-[300px] max-h-[300px]"
+              ></canvas>
+            </div>
+          </div>
+
+          <!-- 📈 Trend Graph -->
+          <div class="glass-card p-6">
+            <h3 class="text-lg font-semibold mb-4">Risk Trend Over Time</h3>
+            <canvas id="riskTrendChart" class="h-[300px]"></canvas>
+          </div>
+        </div>
+      </section>
+
       <section class="mb-20">
         <div class="flex items-center gap-4 mb-8">
           <div class="h-8 w-1 bg-brand rounded-full"></div>
-          <h2 class="text-2xl font-bold text-slate-800 dark:text-gray-400">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
             Performance Metrics
           </h2>
         </div>
@@ -533,24 +623,11 @@
         </div>
       </section>
 
-      <section class="mb-20">
-        <div class="flex items-center gap-4 mb-6">
-          <div class="h-8 w-1 bg-brand rounded-full"></div>
-          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
-            Scan Trends
-          </h2>
-        </div>
-
-        <div class="glass-card p-6">
-          <canvas id="scanChart" height="100"></canvas>
-        </div>
-      </section>
-
       <!-- 🗂 Scan History -->
       <section class="mb-20">
         <div class="flex items-center gap-4 mb-6">
           <div class="h-8 w-1 bg-brand rounded-full"></div>
-          <h2 class="text-2xl font-bold text-slate-800 dark:text-gray-400">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
             Recent Scans
           </h2>
         </div>
@@ -579,7 +656,7 @@
               <div class="flex gap-4 items-center">
                 <!-- Severity -->
                 <span
-                  class="text-sm font-medium {% if scan.severity == 'None' %} text-green-600 {% elif 'Class 1' in scan.severity or 'Class 2' in scan.severity %} text-yellow-600 {% else %} text-red-600 {% endif %}"
+                  class="text-sm font-medium {% if scan.risk == 'Low' %} text-green-600 {% elif scan.risk == 'Moderate' %} text-yellow-600 {% else %} text-red-600 {% endif %}"
                 >
                   {{ scan.severity }}
                 </span>
@@ -673,57 +750,78 @@
     </script>
 
     <script>
-      const ctx = document.getElementById("scanChart");
+            const trendCtx = document.getElementById("riskTrendChart");
 
-      if (ctx) {
-        const labels = JSON.parse(
-          '{{ history | map(attribute="timestamp") | list | tojson | safe }}',
-        );
-        const dataPoints = JSON.parse(
-          '{{ history | map(attribute="confidence") | list | tojson | safe }}',
-        );
+            if (trendCtx) {
+              const labels = {{ history | map(attribute="timestamp") | list | tojson }};
+              const risks = {{ history | map(attribute="risk") | list | tojson }};
 
-        new Chart(ctx, {
-          type: "line",
+      let healthyData = [];
+      let moderateData = [];
+      let highData = [];
+
+      let h = 0, m = 0, hi = 0;
+
+      risks.forEach(r => {
+        if (r === "Low") h++;
+        if (r === "Moderate") m++;
+        if (r === "High") hi++;
+
+        healthyData.push(h);
+        moderateData.push(m);
+        highData.push(hi);
+      });
+
+              new Chart(trendCtx, {
+                type: "line",
+                data: {
+                  labels: labels,
+                  datasets: [
+                    {
+                      label: "Healthy",
+                      data: healthyData,
+                      borderColor: "#22c55e",
+                      tension: 0.4
+                    },
+                    {
+                      label: "Moderate",
+                      data: moderateData,
+                      borderColor: "#eab308",
+                      tension: 0.4
+                    },
+                    {
+                      label: "High",
+                      data: highData,
+                      borderColor: "#ef4444",
+                      tension: 0.4
+                    }
+                  ]
+                }
+              });
+            }
+    </script>
+
+    <script>
+      const pieCtx = document.getElementById("riskPieChart");
+
+      if (pieCtx) {
+        new Chart(pieCtx, {
+          type: "pie",
           data: {
-            labels: labels,
-            datasets: [
-              {
-                label: "Confidence (%)",
-                data: dataPoints,
-                borderColor: "#1713ec",
-                tension: 0.4,
-                fill: false,
-              },
-            ],
+            labels: ["Healthy", "Moderate", "High"],
+            datasets: [{
+              data: [
+                {{ healthy_count }},
+                {{ moderate_count }},
+                {{ high_risk_count }}
+              ],
+              backgroundColor: ["#22c55e", "#eab308", "#ef4444"]
+            }]
           },
           options: {
-            plugins: {
-              legend: {
-                labels: {
-                  color: document.documentElement.classList.contains("dark")
-                    ? "#fff"
-                    : "#000",
-                },
-              },
-            },
-            scales: {
-              x: {
-                ticks: {
-                  color: document.documentElement.classList.contains("dark")
-                    ? "#aaa"
-                    : "#444",
-                },
-              },
-              y: {
-                ticks: {
-                  color: document.documentElement.classList.contains("dark")
-                    ? "#aaa"
-                    : "#444",
-                },
-              },
-            },
-          },
+            responsive: true,
+            maintainAspectRatio: true
+          }
         });
       }
     </script>

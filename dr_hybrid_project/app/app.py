@@ -53,15 +53,16 @@ def scanner():
             pred_index = int(np.argmax(proba))
             confidence = float(proba[pred_index]) * 100
             
-            # 🔥 SECOND BEST CLASS (VERY IMPORTANT)
+            #  SECOND BEST CLASS (VERY IMPORTANT)
             second_index = int(np.argsort(proba)[-2])
             second_conf = float(proba[second_index]) * 100
             
-            # 🔥 DECISION CORRECTION LOGIC
+            #  DECISION CORRECTION LOGIC
             if abs(proba[pred_index] - proba[second_index]) < 0.05:
                 # If close → pick higher severity (safer for medical use)
-                pred_index = max(pred_index, second_index)
-                confidence = float(proba[pred_index]) * 100
+                # pred_index = max(pred_index, second_index)
+                # mark as uncertain but keep original prediction
+                confidence = float(proba[pred_index]) * 100 * 0.9
 
             # Standardized class names
             classes = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
@@ -71,11 +72,11 @@ def scanner():
             pred_description = config.CLASS_DESCRIPTIONS[pred_index]
 
             # predicted_class = int(pred)
-            # 🔥 Clean label mapping
+            #  Clean label mapping
             if pred_index == 0:
                 prediction_label = "No Diabetic Retinopathy"
                 severity_level = "None"
-                severity_level = "Healthy"
+                # severity_level = "Healthy"
                 risk = "Low"
 
             elif pred_index == 1:
@@ -107,6 +108,7 @@ def scanner():
             from datetime import datetime
             scan_entry = {
                 "prediction": prediction_label,
+                "pred_name": pred_name,
                 "confidence": round(confidence, 1),
                 "severity": severity_level,
                 "risk": risk,
@@ -130,11 +132,13 @@ def scanner():
                 "confidence": round(confidence, 1),
                 "description": pred_description,
                 "pred_name": pred_name,
+                "prediction_label": prediction_label,
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
                 "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
                 "uploaded_url": url_for("uploads_file", filename=filename),
                 "risk": risk,
+                "scan_done": True,
             })
         except Exception as e:
             flash(f"Inference error: {e}")
@@ -154,7 +158,9 @@ def index():
 def dashboard():
     if "initialized" not in session:
         session["initialized"] = True
-    result = session.get("last_result", None)
+    history = session.get("scan_history", []) or []
+    # result = session.get("last_result", {}) or {}   
+    result = session.get("last_result") or {}
 
     # Chart files
     cm = "model_accuracy_bar_chart.png"
@@ -168,27 +174,44 @@ def dashboard():
     f1_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, f1))
     radar_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, radar))
 
-    history = session.get("scan_history", [])
-
     healthy_count = sum(
         1 for h in history 
-        if h.get("severity") == "None"
+        if h.get("severity") in ["None", "Healthy"]
+        or "No DR" in h.get("prediction", "")
     )
 
     high_risk_count = sum(
         1 for h in history 
-        if h.get("severity") in ["Severe", "Critical"]
+        if h.get("risk") == "High"
     )
+
+    moderate_count = sum(
+    1 for h in history 
+    if h.get("risk") == "Moderate"
+    )
+
+    total_scans = len(history)
+
+    if total_scans == 0:
+        healthy_percent = moderate_percent = high_percent = 0
+    else:
+        healthy_percent = round((healthy_count / total_scans) * 100, 1)
+        moderate_percent = round((moderate_count / total_scans) * 100, 1)
+        high_percent = round((high_risk_count / total_scans) * 100, 1)   
 
     return render_template(
         "dashboard.html",
-        prediction=result["prediction"] if result else None,
-        confidence=result["confidence"] if result else None,
-        severity=result["severity"] if result else None,
-        risk=result["risk"] if result else None,
+        prediction=result.get("pred_name") or result.get("prediction"),
+        confidence=result.get("confidence"),
+        severity=result.get("severity"),
+        risk=result.get("risk"),
         history=history,
         healthy_count=healthy_count,
+        moderate_count=moderate_count,
         high_risk_count=high_risk_count,
+        healthy_percent=healthy_percent,
+        moderate_percent=moderate_percent,
+        high_percent=high_percent,
         accuracy_url=url_for("outputs_file", filename=f1) if f1_exists else None,
         cm_url=url_for("outputs_file", filename=cm) if cm_exists else None,
         radar_url=url_for("outputs_file", filename=radar) if radar_exists else None,
