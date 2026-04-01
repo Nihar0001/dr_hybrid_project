@@ -206,6 +206,7 @@ def dashboard():
             "latest_severity": latest_scan.get("severity") or "N/A",
             "latest_confidence": latest_scan.get("confidence"),
             "scan_count": len(scans),
+            "latest_timestamp": latest_scan.get("date") or latest_scan.get("timestamp") or "Recently",
         })
         for scan in scans:
             history.append({
@@ -218,7 +219,7 @@ def dashboard():
             })
 
     history.sort(key=lambda s: s.get("timestamp") or "", reverse=True)
-    patient_summaries.sort(key=lambda p: p["name"].lower())
+    patient_summaries.sort(key=lambda p: p.get("latest_timestamp") or "", reverse=True)
 
     if history:
         latest = history[0]
