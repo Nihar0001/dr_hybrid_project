@@ -11,3 +11,4 @@ joblib
 scikit-image
 flask
 werkzeug
+reportlab
