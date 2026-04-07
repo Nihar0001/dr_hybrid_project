@@ -599,9 +599,9 @@
           </h2>
         </div>
 
-        {% if patient_summaries and patient_summaries|length > 0 %}
+        {% if paginated_patient_summaries and paginated_patient_summaries|length > 0 %}
         <div class="space-y-5">
-          {% for patient in patient_summaries %}
+          {% for patient in paginated_patient_summaries %}
           <div
             class="glass-card p-6 rounded-eight border border-slate-100 dark:border-gray-700"
           >
@@ -619,11 +619,8 @@
               </div>
             </div>
 
-            <!-- Patient Scans -->
+            <!-- Latest Scan Only -->
             <div class="space-y-3 mb-5">
-              {% set patient_scans = history | selectattr('patient_name',
-              'equalto', patient.name) | list | reverse %} {% for scan in
-              patient_scans %}
               <div
                 class="flex items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-100 dark:border-gray-700"
               >
@@ -631,24 +628,23 @@
                   <div
                     class="text-sm font-semibold text-slate-800 dark:text-white truncate"
                   >
-                    {{ scan.prediction }}
+                    {{ patient.latest_prediction if patient.latest_prediction else "No DR" }}
                   </div>
                   <div class="text-xs text-slate-500 dark:text-gray-400 mt-1">
                     Confidence:
-                    <span class="font-medium">{{ scan.confidence }}%</span>
-                    • {{ scan.timestamp if scan.timestamp else "Recently" }}
+                    <span class="font-medium">{{ patient.latest_confidence if patient.latest_confidence is not none else "--" }}{% if patient.latest_confidence is not none %}%{% endif %}</span>
+                    • {{ patient.display_time if patient.display_time else "Recently" }}
                   </div>
                 </div>
 
                 <div class="flex-shrink-0">
                   <span
-                    class="px-3 py-1 rounded-full text-xs font-bold {% if scan.severity == 'Healthy' or scan.severity == 'None' %} bg-green-100 text-green-700 {% elif scan.severity == 'Mild' %} bg-yellow-100 text-yellow-700 {% elif scan.severity == 'Moderate' %} bg-orange-100 text-orange-700 {% else %} bg-red-600 text-white {% endif %}"
+                    class="px-3 py-1 rounded-full text-xs font-bold {% if patient.latest_severity == 'Healthy' or patient.latest_severity == 'None' %} bg-green-100 text-green-700 {% elif patient.latest_severity == 'Mild' or patient.latest_severity == 'Class 1' %} bg-yellow-100 text-yellow-700 {% elif patient.latest_severity == 'Moderate' or patient.latest_severity == 'Class 2' %} bg-orange-100 text-orange-700 {% else %} bg-red-600 text-white {% endif %}"
                   >
-                    {{ scan.severity }}
+                    {{ patient.latest_severity if patient.latest_severity else "--" }}
                   </span>
                 </div>
               </div>
-              {% endfor %}
             </div>
 
             <!-- Download Button -->
@@ -665,6 +661,46 @@
           </div>
           {% endfor %}
         </div>
+
+        {% if total_pages > 1 %}
+        <div class="flex items-center justify-center gap-3 mt-8">
+          {% if page > 1 %}
+          <a
+            href="{{ url_for('dashboard', page=page-1) }}"
+            class="px-4 py-2 text-sm font-semibold rounded-eight border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-200 bg-white/80 dark:bg-slate-800/70 hover:shadow transition-all"
+          >
+            Previous
+          </a>
+          {% else %}
+          <span
+            class="px-4 py-2 text-sm font-semibold rounded-eight border border-slate-200 dark:border-gray-700 text-slate-400 dark:text-gray-500 bg-white/60 dark:bg-slate-800/40 cursor-not-allowed"
+          >
+            Previous
+          </span>
+          {% endif %}
+
+          <span
+            class="px-4 py-2 text-sm font-semibold rounded-eight bg-brand text-white"
+          >
+            Page {{ page }} of {{ total_pages }}
+          </span>
+
+          {% if page < total_pages %}
+          <a
+            href="{{ url_for('dashboard', page=page+1) }}"
+            class="px-4 py-2 text-sm font-semibold rounded-eight border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-200 bg-white/80 dark:bg-slate-800/70 hover:shadow transition-all"
+          >
+            Next
+          </a>
+          {% else %}
+          <span
+            class="px-4 py-2 text-sm font-semibold rounded-eight border border-slate-200 dark:border-gray-700 text-slate-400 dark:text-gray-500 bg-white/60 dark:bg-slate-800/40 cursor-not-allowed"
+          >
+            Next
+          </span>
+          {% endif %}
+        </div>
+        {% endif %}
         {% else %}
         <div class="glass-card p-12 text-center">
           <p class="text-slate-500 dark:text-gray-400">No scan history yet.</p>

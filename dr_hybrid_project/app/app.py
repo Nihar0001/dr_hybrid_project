@@ -220,7 +220,11 @@ def dashboard():
             "name": patient_name,
             "scan_count": len(scans),
             "latest_timestamp": latest.get("date"),  # keep raw for sorting
-            "display_time": format_datetime(latest.get("date"))
+            "display_time": format_datetime(latest.get("date")),
+            "latest_prediction": latest.get("result"),
+            "latest_confidence": latest.get("confidence"),
+            "latest_severity": latest.get("severity"),
+            "latest_risk": latest.get("risk"),
         })
 
         # ✅ THIS MUST BE INSIDE LOOP
@@ -270,17 +274,22 @@ def dashboard():
     elif sort_by == "confidence":
         filtered_history = sorted(filtered_history, key=lambda x: x.get("confidence", 0), reverse=True)
 
-    # 📄 Pagination
+    # 📄 Pagination (for Recent Scans patient cards)
     page = request.args.get("page", 1, type=int)
     per_page = 3
 
-    total = len(filtered_history)
+    total = len(patient_summaries)
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
+
+    if page < 1:
+        page = 1
+    elif page > total_pages:
+        page = total_pages
+
     start = (page - 1) * per_page
     end = start + per_page
 
-    paginated_history = filtered_history[start:end]
-
-    total_pages = (total + per_page - 1) // per_page
+    paginated_patient_summaries = patient_summaries[start:end]
     # result = session.get("last_result", {}) or {}   
     # result = session.get("last_result") or {}
 
@@ -297,18 +306,17 @@ def dashboard():
 
     healthy_count = sum(
         1 for h in history 
-        if h.get("severity") in ["None", "Healthy"]
-        or "No DR" in h.get("prediction", "")
+        if h.get("risk") == "Low"
+    )
+
+    moderate_count = sum(
+        1 for h in history 
+        if h.get("risk") in ["Moderate", "Mild"]
     )
 
     high_risk_count = sum(
         1 for h in history 
-        if h.get("risk") == "High"
-    )
-
-    moderate_count = sum(
-    1 for h in history 
-    if h.get("risk") == "Moderate"
+        if h.get("risk") in ["High", "Critical"]
     )
 
     total_scans = len(history)
@@ -328,6 +336,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         patient_summaries=patient_summaries,
+        paginated_patient_summaries=paginated_patient_summaries,
         prediction=latest.get("prediction"),
         confidence=latest.get("confidence"),
         severity=latest.get("severity"),
