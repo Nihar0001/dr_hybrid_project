@@ -9,6 +9,7 @@
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       tailwind.config = {
         darkMode: "class",
@@ -45,6 +46,7 @@
           el.textContent = end + "%";
           return;
         }
+
         let range = end - start;
         let current = start;
         let increment = end > start ? 1 : -1;
@@ -70,6 +72,11 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      * {
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
       body {
         animation: formFade 1s ease forwards;
       }
@@ -179,11 +186,12 @@
       </div>
       <div
         class="hidden md:flex space-x-8 text-sm font-medium text-slate-600 dark:text-gray-300"
+        style="position: relative"
       >
         <a
           href="{{ url_for('index') }}"
           class="hover:text-brand transition-colors"
-          style="padding-left: 55px"
+          style="padding-left: 150px"
           >Home</a
         >
         <a
@@ -191,13 +199,13 @@
           class="hover:text-brand transition-colors active"
           >Dashboard</a
         >
-        <a
-          href="{{ url_for('scanner') }}"
-          class="hover:text-brand transition-colors"
-          >Diagnostic View</a
-        >
       </div>
       <div class="flex items-center gap-4">
+        <span
+          class="hidden md:inline text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 font-semibold"
+        >
+          System Online
+        </span>
         <!-- Dark Mode Toggle -->
         <div
           id="themeToggle"
@@ -210,7 +218,6 @@
             🌞
           </div>
         </div>
-
         <a
           href="{{ url_for('scanner') }}"
           class="bg-brand text-white px-6 py-2.5 rounded-eight text-sm font-semibold hover:shadow-lg transition-all inline-block"
@@ -222,11 +229,6 @@
 
     <header class="py-8 px-6 text-center">
       <div class="max-w-4xl mx-auto">
-        <div
-          class="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-2"
-        >
-          SYSTEM / ANALYTICS / ENSEMBLE_V1.4
-        </div>
         <h1
           class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white transition-colors duration-300 ..."
         >
@@ -241,6 +243,41 @@
         </p>
       </div>
     </header>
+
+    <div
+      class="max-w-7xl mx-auto px-6 mb-10 grid grid-cols-1 md:grid-cols-5 gap-6"
+    >
+      <div class="glass-card p-5">
+        <p class="text-sm text-slate-500 dark:text-gray-400">Total Scans</p>
+        <h3 class="text-2xl font-bold text-brand mt-1">{{ total_scans }}</h3>
+      </div>
+
+      <div class="glass-card p-5">
+        <p class="text-sm text-slate-500 dark:text-gray-400">Healthy Cases</p>
+        <h3 class="text-2xl font-bold text-green-600 mt-1">
+          {{ healthy_count }}
+        </h3>
+      </div>
+
+      <div class="glass-card p-5">
+        <p class="text-sm text-slate-500 dark:text-gray-400">Moderate Risk</p>
+        <h3 class="text-2xl font-bold text-yellow-500 mt-1">
+          {{ moderate_count }}
+        </h3>
+      </div>
+
+      <div class="glass-card p-5">
+        <p class="text-sm text-slate-500 dark:text-gray-400">Severe Cases</p>
+        <h3 class="text-2xl font-bold text-red-500 mt-1">
+          {{ high_risk_count }}
+        </h3>
+      </div>
+
+      <div class="glass-card p-5">
+        <p class="text-sm text-slate-500 dark:text-gray-400">Model Accuracy</p>
+        <h3 class="text-2xl font-bold text-brand mt-1">94.2%</h3>
+      </div>
+    </div>
 
     <section class="mb-12" style="margin: 20px">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -270,11 +307,12 @@
             class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-2 mt-3"
           >
             <div
-              class="bg-brand h-2 rounded-full transition-all duration-700 dynamic-style {{ 'opacity-30' if not confidence else '' }}"
-              data-width="{{ confidence if confidence else 0 }}%">
-            </div>
+              class="bg-brand h-2 rounded-full transition-all duration-700 {{ 'opacity-30' if not confidence else '' }}"
+              style="width: {{ confidence if confidence else 0 }}%"
+            ></div>
           </div>
         </div>
+
         <!-- Severity -->
         <div
           class="glass-card p-6 text-center flex flex-col justify-center min-h-[140px]"
@@ -283,10 +321,7 @@
             Severity Level
           </h4>
           <div
-            class="text-2xl font-bold mt-2 
-            {% if severity == 'None' %} text-green-600 
-            {% elif severity == 'Mild' or severity == 'Moderate' %} text-yellow-500 
-            {% else %} text-red-600 {% endif %}"
+            class="text-2xl font-bold mt-2 {% if severity == 'None' %} text-green-600 {% elif severity == 'Class 1' or severity == 'Class 2' %} text-yellow-600 {% else %} text-red-600 {% endif %}"
           >
             {{ severity if severity else "Awaiting scan" }}
           </div>
@@ -300,24 +335,22 @@
 
           <div class="mt-2">
             {% if risk == "Low" %}
-            <span class="px-4 py-1 rounded-full text-green-600 bg-green-100 font-semibold">
+            <span
+              class="px-4 py-1 rounded-full text-green-600 bg-green-100 font-semibold"
+            >
               Low Risk
             </span>
-            {% elif risk == "Mild" %}
-            <span class="px-4 py-1 rounded-full text-yellow-500 bg-yellow-50 font-semibold">
-              Mild Risk
-            </span>
             {% elif risk == "Moderate" %}
-            <span class="px-4 py-1 rounded-full text-orange-500 bg-orange-50 font-semibold">
+            <span
+              class="px-4 py-1 rounded-full text-yellow-600 bg-yellow-100 font-semibold"
+            >
               Moderate Risk
             </span>
             {% elif risk == "High" %}
-            <span class="px-4 py-1 rounded-full text-red-600 bg-red-100 font-semibold">
+            <span
+              class="px-4 py-1 rounded-full text-red-600 bg-red-100 font-semibold"
+            >
               High Risk
-            </span>
-            {% elif risk == "Critical" %}
-            <span class="px-4 py-1 rounded-full text-red-700 bg-red-200 font-bold">
-              Critical
             </span>
             {% else %}
             <span class="text-slate-400 dark:text-gray-500">--</span>
@@ -356,35 +389,6 @@
     </div>
 
     <main class="max-w-7xl mx-auto px-6 md:px-8 pb-24">
-      <section class="mb-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="glass-card rounded-eight p-6 flex gap-4 items-center">
-            <div class="text-4xl text-brand">
-              <i class="fas fa-notes-medical"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-slate-800 dark:text-gray-400">
-                Medical Reference: Diabetic Retinopathy
-              </h3>
-              <p class="text-slate-600 dark:text-gray-400 text-sm mt-1">
-                Vessel segmentation analysis categorized across 5 severity
-                levels: Class 0 to Class 4.
-              </p>
-            </div>
-          </div>
-          <div
-            class="glass-card rounded-eight p-6 flex flex-col justify-center"
-          >
-            <h3 class="font-bold text-slate-800 dark:text-gray-400">
-              Hybrid Feature Fusion
-            </h3>
-            <div class="text-2xl font-bold text-brand mt-2">32,818 VECTORS</div>
-            <p class="text-slate-500 dark:text-gray-400 text-xs mt-1">
-              Combined CNN Shape + GLCM Texture + LBP Pattern.
-            </p>
-          </div>
-        </div>
-      </section>
       {% if not prediction %}
       <div class="text-center py-12 text-slate-500 dark:text-gray-400">
         <i class="fas fa-info-circle text-2xl mb-2"></i>
@@ -398,10 +402,93 @@
       </div>
       {% endif %}
 
+      <!-- 📊 Risk Distribution Bars -->
+      <section class="mb-20">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="h-8 w-1 bg-brand rounded-full"></div>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
+            Risk Distribution
+          </h2>
+        </div>
+
+        <div class="glass-card p-6 space-y-5">
+          <!-- Healthy -->
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span>Healthy</span>
+              <span>{{ healthy_percent }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                class="bg-green-500 h-3 rounded-full"
+                style="width: {{ healthy_percent }}%"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Moderate -->
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span>Moderate</span>
+              <span>{{ moderate_percent }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                class="bg-yellow-500 h-3 rounded-full"
+                style="width: {{ moderate_percent }}%"
+              ></div>
+            </div>
+          </div>
+
+          <!-- High -->
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span>High</span>
+              <span>{{ high_percent }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                class="bg-red-500 h-3 rounded-full"
+                style="width: {{ high_percent }}%"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-20">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="h-8 w-1 bg-brand rounded-full"></div>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
+            Risk Analytics
+          </h2>
+        </div>
+
+        <!-- 🔥 TWO CHARTS SIDE BY SIDE -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- 🥧 Pie Chart -->
+          <div class="glass-card p-6">
+            <h3 class="text-lg font-semibold mb-4">Risk Distribution</h3>
+            <div class="w-full flex justify-center">
+              <canvas
+                id="riskPieChart"
+                class="max-w-[300px] max-h-[300px]"
+              ></canvas>
+            </div>
+          </div>
+
+          <!-- 📈 Trend Graph -->
+          <div class="glass-card p-6">
+            <h3 class="text-lg font-semibold mb-4">Risk Trend Over Time</h3>
+            <canvas id="riskTrendChart" class="h-[300px]"></canvas>
+          </div>
+        </div>
+      </section>
+
       <section class="mb-20">
         <div class="flex items-center gap-4 mb-8">
           <div class="h-8 w-1 bg-brand rounded-full"></div>
-          <h2 class="text-2xl font-bold text-slate-800 dark:text-gray-400">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
             Performance Metrics
           </h2>
         </div>
@@ -503,76 +590,119 @@
         </div>
       </section>
 
-      <!-- 🗂 Unified Scan History & Patient Reports -->
+      <!-- 🗂 Patient-wise Scan History + Reports -->
       <section class="mb-20">
         <div class="flex items-center gap-4 mb-6">
           <div class="h-8 w-1 bg-brand rounded-full"></div>
-          <h2 class="text-2xl font-bold text-slate-800 dark:text-gray-400">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
             Recent Scans
           </h2>
         </div>
 
         {% if patient_summaries and patient_summaries|length > 0 %}
-          <div class="space-y-5">
-            {% for patient in patient_summaries %}
-              <div class="glass-card p-6 rounded-eight border border-slate-100 dark:border-gray-700">
-                <!-- Patient Header -->
-                <div class="flex items-center justify-between mb-5 pb-4 border-b border-slate-200 dark:border-gray-600">
-                  <div>
-                    <h3 class="font-bold text-lg text-slate-800 dark:text-white">{{ patient.name }}</h3>
-                    <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">{{ patient.scan_count }} scan(s)</p>
+        <div class="space-y-5">
+          {% for patient in patient_summaries %}
+          <div
+            class="glass-card p-6 rounded-eight border border-slate-100 dark:border-gray-700"
+          >
+            <!-- Patient Header -->
+            <div
+              class="flex items-center justify-between mb-5 pb-4 border-b border-slate-200 dark:border-gray-600"
+            >
+              <div>
+                <h3 class="font-bold text-lg text-slate-800 dark:text-white">
+                  {{ patient.name }}
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                  {{ patient.scan_count }} scan(s)
+                </p>
+              </div>
+            </div>
+
+            <!-- Patient Scans -->
+            <div class="space-y-3 mb-5">
+              {% set patient_scans = history | selectattr('patient_name',
+              'equalto', patient.name) | list | reverse %} {% for scan in
+              patient_scans %}
+              <div
+                class="flex items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-100 dark:border-gray-700"
+              >
+                <div class="flex-1 min-w-0">
+                  <div
+                    class="text-sm font-semibold text-slate-800 dark:text-white truncate"
+                  >
+                    {{ scan.prediction }}
+                  </div>
+                  <div class="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                    Confidence:
+                    <span class="font-medium">{{ scan.confidence }}%</span>
+                    • {{ scan.timestamp if scan.timestamp else "Recently" }}
                   </div>
                 </div>
 
-                <!-- Patient Scans List -->
-                <div class="space-y-3 mb-5">
-                  {% set patient_scans = history | selectattr('patient_name', 'equalto', patient.name) | list | reverse %}
-                  {% for scan in patient_scans %}
-                    <div class="flex items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-100 dark:border-gray-700">
-                      <div class="flex-1 min-w-0">
-                        <div class="text-sm font-semibold text-slate-800 dark:text-white truncate">
-                          {{ scan.prediction }}
-                        </div>
-                        <div class="text-xs text-slate-500 dark:text-gray-400 mt-1">
-                          Confidence: <span class="font-medium">{{ scan.confidence }}%</span> • {{ scan.timestamp if scan.timestamp else "Recently" }}
-                        </div>
-                      </div>
-                      <div class="flex-shrink-0">
-                        <span
-                          class="px-3 py-1 rounded-full text-xs font-bold shadow-sm whitespace-nowrap
-                          {% if scan.severity == 'Healthy' or scan.severity == 'None' %} bg-green-100 text-green-700 border border-green-200
-                          {% elif scan.severity == 'Mild' %} bg-yellow-100 text-yellow-700 border border-yellow-200
-                          {% elif scan.severity == 'Moderate' %} bg-orange-100 text-orange-700 border border-orange-200
-                          {% else %} bg-red-600 text-white shadow-red-200/50 {% endif %}"
-                        >
-                          {{ scan.severity }}
-                        </span>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-
-                <!-- Download Button - Fixed at Bottom -->
-                <div class="flex justify-end pt-3 border-t border-slate-100 dark:border-gray-700">
-                  <a
-                    href="{{ url_for('download_report', patient_name=patient.name) }}"
-                    class="bg-brand text-white px-6 py-2.5 rounded-eight text-sm font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2"
+                <div class="flex-shrink-0">
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-bold {% if scan.severity == 'Healthy' or scan.severity == 'None' %} bg-green-100 text-green-700 {% elif scan.severity == 'Mild' %} bg-yellow-100 text-yellow-700 {% elif scan.severity == 'Moderate' %} bg-orange-100 text-orange-700 {% else %} bg-red-600 text-white {% endif %}"
                   >
-                    <i class="fas fa-download"></i>Download Report
-                  </a>
+                    {{ scan.severity }}
+                  </span>
                 </div>
               </div>
-            {% endfor %}
+              {% endfor %}
+            </div>
+
+            <!-- Download Button -->
+            <div
+              class="flex justify-end pt-3 border-t border-slate-100 dark:border-gray-700"
+            >
+              <a
+                href="{{ url_for('download_report', patient_name=patient.name) }}"
+                class="bg-brand text-white px-6 py-2.5 rounded-eight text-sm font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2"
+              >
+                <i class="fas fa-download"></i> Download Report
+              </a>
+            </div>
           </div>
+          {% endfor %}
+        </div>
         {% else %}
-          <div class="glass-card p-12 text-center">
-            <i class="fas fa-inbox text-4xl mb-4 text-slate-300 dark:text-gray-600"></i>
-            <p class="text-slate-500 dark:text-gray-400 font-medium">No scan history yet. Start by analyzing a retina image.</p>
-          </div>
+        <div class="glass-card p-12 text-center">
+          <p class="text-slate-500 dark:text-gray-400">No scan history yet.</p>
+        </div>
         {% endif %}
       </section>
 
-      <div class="flex justify-end">
+      <section class="mb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="glass-card rounded-eight p-6 flex gap-4 items-center">
+            <div class="text-4xl text-brand">
+              <i class="fas fa-notes-medical"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-800 dark:text-gray-400">
+                Medical Reference: Diabetic Retinopathy
+              </h3>
+              <p class="text-slate-600 dark:text-gray-400 text-sm mt-1">
+                Vessel segmentation analysis categorized across 5 severity
+                levels: Class 0 to Class 4.
+              </p>
+            </div>
+          </div>
+          <div
+            class="glass-card rounded-eight p-6 flex flex-col justify-center"
+          >
+            <h3 class="font-bold text-slate-800 dark:text-gray-400">
+              Hybrid Feature Fusion
+            </h3>
+            <div class="text-2xl font-bold text-brand mt-2">32,818 VECTORS</div>
+            <p class="text-slate-500 dark:text-gray-400 text-xs mt-1">
+              Combined CNN Shape + GLCM Texture + LBP Pattern.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="flex justify-center">
         <a
           href="{{ url_for('scanner') }}"
           class="bg-brand text-white px-8 py-4 rounded-eight font-bold shadow-lg hover:bg-brand/90 transition-all inline-block"
@@ -641,16 +771,111 @@
         });
       }
     </script>
+
     <script>
-      // Apply data-driven styles once page is ready
-      function applyDynamicStyles() {
-          document.querySelectorAll('.dynamic-style').forEach(el => {
-              if (el.dataset.width) el.style.width = el.dataset.width;
-              if (el.dataset.bg) el.style.background = el.dataset.bg;
-          });
+            const trendCtx = document.getElementById("riskTrendChart");
+
+            if (trendCtx) {
+              const labels = {{ history | map(attribute="timestamp") | list | tojson }};
+              const risks = {{ history | map(attribute="risk") | list | tojson }};
+
+      let healthyData = [];
+      let moderateData = [];
+      let highData = [];
+
+      let h = 0, m = 0, hi = 0;
+
+      risks.forEach(r => {
+        if (r === "Low") h++;
+        if (r === "Moderate") m++;
+        if (r === "High") hi++;
+
+        healthyData.push(h);
+        moderateData.push(m);
+        highData.push(hi);
+      });
+
+              new Chart(trendCtx, {
+                type: "line",
+                data: {
+                  labels: labels,
+                  datasets: [
+                    {
+                      label: "Healthy",
+                      data: healthyData,
+                      borderColor: "#22c55e",
+                      tension: 0.4
+                    },
+                    {
+                      label: "Moderate",
+                      data: moderateData,
+                      borderColor: "#eab308",
+                      tension: 0.4
+                    },
+                    {
+                      label: "High",
+                      data: highData,
+                      borderColor: "#ef4444",
+                      tension: 0.4
+                    }
+                  ]
+                }
+              });
+            }
+    </script>
+
+    <script>
+      const pieCtx = document.getElementById("riskPieChart");
+
+      if (pieCtx) {
+        new Chart(pieCtx, {
+          type: "pie",
+          data: {
+            labels: ["Healthy", "Moderate", "High"],
+            datasets: [{
+              data: [
+                {{ healthy_count }},
+                {{ moderate_count }},
+                {{ high_risk_count }}
+              ],
+              backgroundColor: ["#22c55e", "#eab308", "#ef4444"]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true
+          }
+        });
       }
-      document.addEventListener("DOMContentLoaded", applyDynamicStyles);
-      window.addEventListener('load', applyDynamicStyles);
+    </script>
+
+    <script>
+      async function loadScans(params = {}) {
+        const url = new URL("/recent-scans", window.location.origin);
+
+        Object.keys(params).forEach((key) => {
+          url.searchParams.set(key, params[key]);
+        });
+
+        const res = await fetch(url);
+        const html = await res.text();
+
+        document.getElementById("recentScansContainer").innerHTML = html;
+      }
+
+      // Apply filters without reload
+      function applyFilters() {
+        const search = document.querySelector("input[name='search']").value;
+        const risk = document.getElementById("riskFilter").value;
+        const sort = document.getElementById("sortBy").value;
+
+        loadScans({
+          search: search,
+          risk: risk,
+          sort: sort,
+          page: 1,
+        });
+      }
     </script>
   </body>
 </html>

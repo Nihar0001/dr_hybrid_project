@@ -38,6 +38,7 @@ def infer_image(image_path):
     name, _ = os.path.splitext(filename)
     out_path = os.path.join(config.OUTPUTS_DIR, f"{name}_gradcam.png")
     preprocessed_path = os.path.join(config.UPLOADS_DIR, f"{name}_input.png")
+    preprocessed_path = os.path.join(config.UPLOADS_DIR, f"{name}_input.png")
     cv2.imwrite(out_path, overlay)              # ✅ ADD THIS
     cv2.imwrite(preprocessed_path, img_bgr)
 

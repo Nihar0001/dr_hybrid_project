@@ -28,3 +28,21 @@ models/vgg16_weights*
 .DS_Store
 Thumbs.db
 stitch_screens/
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Flask
+instance/
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+stitch_screens/

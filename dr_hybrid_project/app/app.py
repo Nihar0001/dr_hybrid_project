@@ -1,48 +1,47 @@
+from datetime import datetime
 import os
 import sys
-import json
-from datetime import datetime
-from io import BytesIO
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, send_file, flash, session
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, session
 from werkzeug.utils import secure_filename
-from reportlab.lib.pagesizes import A4
+from flask import send_file
+import json
+from io import BytesIO
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
+
+def load_data():
+    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+
+    if not os.path.exists(DATA_FILE):
+        return {"patients": {}}
+
+    with open(DATA_FILE, "r") as f:
+        return json.load(f)
+
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+def format_datetime(iso_str):
+    try:
+        dt = datetime.fromisoformat(iso_str)
+        return dt.strftime("%d %b %Y, %I:%M %p")
+    except:
+        return iso_str
 
 # --- make 'src' importable when app runs from app/ ---
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# from dr_hybrid_project.src import data
 from src import config
+DATA_FILE = os.path.join(config.PROJECT_ROOT, "data", "patient_scans.json")
 from src.infer import infer_image
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.secret_key = "dr-secret"  # set your own
-DATA_FILE = os.path.join(config.PROJECT_ROOT, "data", "patient_scans.json")
-
-
-def load_data():
-    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-    if not os.path.exists(DATA_FILE):
-        data = {"patients": {}}
-        with open(DATA_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-        return data
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except (json.JSONDecodeError, OSError):
-        data = {"patients": {}}
-    if "patients" not in data or not isinstance(data["patients"], dict):
-        data["patients"] = {}
-    return data
-
-
-def save_data(data):
-    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
 
 
 def allowed_file(filename):
@@ -51,21 +50,15 @@ def allowed_file(filename):
 
 @app.route("/scanner", methods=["GET", "POST"])
 def scanner():
-    context = {
+    context = {        
         "pred": None,
         "severity": None,
         "risk": None,
         "prediction_label": None,
-        "confidence": None,
-        "decision": None,
-        "recommendation": None,
-    }
+        "confidence": None,}
     if request.method == "POST":
+        
         patient_name = request.form.get("patient_name", "").strip()
-        if not patient_name:
-            flash("Patient name is required.")
-            return redirect(url_for("scanner"))
-
         if "file" not in request.files:
             flash("No file uploaded.")
             return redirect(url_for("scanner"))
@@ -76,6 +69,9 @@ def scanner():
         if not allowed_file(f.filename):
             flash("Please upload a PNG/JPG image.")
             return redirect(url_for("scanner"))
+        if not patient_name:
+            flash("Patient name is required")
+            return redirect(url_for("scanner"))
         
         filename = secure_filename(f.filename)
         save_path = os.path.join(config.UPLOADS_DIR, filename)
@@ -84,241 +80,363 @@ def scanner():
         try:
             pred, proba, heatmap_path, *_ = infer_image(save_path)
 
-            # Calculate confidence as percentage of predicted class
-            confidence = float(proba[pred]) * 100
-            pred_class_name = config.CLASS_NAMES[int(pred)]
-            pred_description = config.CLASS_DESCRIPTIONS[int(pred)]
+            import numpy as np
+            
+            proba = np.array(proba)
+            
+            pred_index = int(np.argmax(proba))
+            confidence = float(proba[pred_index]) * 100
+            
+            #  SECOND BEST CLASS (VERY IMPORTANT)
+            second_index = int(np.argsort(proba)[-2])
+            second_conf = float(proba[second_index]) * 100
+            
+            #  DECISION CORRECTION LOGIC
+            if abs(proba[pred_index] - proba[second_index]) < 0.05:
+                # If close → pick higher severity (safer for medical use)
+                # pred_index = max(pred_index, second_index)
+                # mark as uncertain but keep original prediction
+                confidence = float(proba[pred_index]) * 100 * 0.9
 
-            predicted_class = int(pred)
-            if predicted_class == 0:
-                prediction_label = "No Diabetic Retinopathy Detected"
-                severity_level = "Healthy"
+            # Standardized class names
+            classes = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
+            pred_name = classes[pred_index]
+
+            # Description (keep yours if needed)
+            pred_description = config.CLASS_DESCRIPTIONS[pred_index]
+
+            # predicted_class = int(pred)
+            #  Clean label mapping
+            if pred_index == 0:
+                prediction_label = "No Diabetic Retinopathy"
+                severity_level = "None"
+                # severity_level = "Healthy"
                 risk = "Low"
-                decision = "Healthy Retina"
-                recommendation = "Routine check-up recommended"
-            else:
-                prediction_label = "Diabetic Retinopathy Detected"
-                severity_level = pred_class_name # e.g. 'Mild', 'Moderate', etc.
-                if predicted_class == 1:
-                    risk = "Mild"
-                    decision = "Early DR Signs"
-                    recommendation = "Monitor regularly and consult specialist"
-                elif predicted_class == 2:
-                    risk = "Moderate"
-                    decision = "Attention Required"
-                    recommendation = "Clinical evaluation advised soon"
-                elif predicted_class == 3:
-                    risk = "High"
-                    decision = "Urgent Specialist Review"
-                    recommendation = "Urgent ophthalmology consultation is recommended"
-                else:
-                    risk = "Critical"
-                    decision = "Immediate Intervention Needed"
-                    recommendation = "Immediate medical attention required"
 
-            timestamp = datetime.utcnow().isoformat()
+            elif pred_index == 1:
+                prediction_label = "Mild DR"
+                severity_level = "Class 1"
+                risk = "Moderate"
 
-            # Persistent JSON storage grouped by patient
-            data = load_data()
-            patients = data.setdefault("patients", {})
-            if patient_name not in patients:
-                patients[patient_name] = []
-            patients[patient_name].append({
-                "date": timestamp,
-                "result": pred_class_name,
-                "severity": severity_level,
-                "risk": risk,
-                "decision": decision,
-                "recommendation": recommendation,
-                "confidence": round(confidence, 1),
-                "image_path": filename,
-                "overlay_path": os.path.basename(heatmap_path),
-            })
-            save_data(data)
+            elif pred_index == 2:
+                prediction_label = "Moderate DR"
+                severity_level = "Class 2"
+                risk = "Moderate"
+
+            elif pred_index == 3:
+                prediction_label = "Severe DR"
+                severity_level = "Severe"
+                risk = "High"
+
+            elif pred_index == 4:
+                prediction_label = "Proliferative DR"
+                severity_level = "Critical"
+                risk = "High"
+                
+            # 🧠 Confidence threshold safeguard
+            if confidence < 50:
+                prediction_label += " (Low Confidence)"
 
             # ✅ Create scan entry
+
+            from datetime import datetime
+
             scan_entry = {
-                "patient_name": patient_name,
+                "patient_name": patient_name,   # 🔥 ADD THIS
                 "prediction": prediction_label,
+                "pred_name": pred_name,
                 "confidence": round(confidence, 1),
                 "severity": severity_level,
                 "risk": risk,
-                "decision": decision,
-                "recommendation": recommendation,
-                "timestamp": timestamp,
-                "result": pred_class_name,
-                "image_path": filename,
-                "overlay_path": os.path.basename(heatmap_path),
+                "timestamp": datetime.now().strftime("%d %b %H:%M")
             }
+
             # ✅ Initialize history if not exists
-            if "scan_history" not in session:
-                session["scan_history"] = []
-            # ✅ Add latest scan to top
-            history = session["scan_history"]
-            history.insert(0, scan_entry)
-            # ✅ Keep only last 5 scans (optional)
-            session["scan_history"] = history[:5]
-            # ✅ Store latest separately (for main cards)
-            session["last_result"] = scan_entry
+            timestamp = datetime.utcnow().isoformat()
+
+            data = load_data()
+            patients = data.setdefault("patients", {})
+
+            if patient_name not in patients:
+                patients[patient_name] = []
+
+            patients[patient_name].append({
+                "date": timestamp,
+                "result": pred_name,
+                "severity": severity_level,
+                "risk": risk,
+                "confidence": round(confidence, 1),
+                "image_path": filename,
+                "overlay_path": os.path.basename(heatmap_path)
+            })
+
+            save_data(data)
 
             context.update({
-                "patient_name": patient_name,
-                "pred": int(pred),
-                "prediction_label": prediction_label,
+                "pred": pred_index,
                 "severity": severity_level,
                 "confidence": round(confidence, 1),
                 "description": pred_description,
-                "pred_name": pred_class_name,
+                "pred_name": pred_name,
+                "prediction_label": prediction_label,
                 "proba": proba.tolist(),
                 "class_names": config.CLASS_NAMES,
                 "overlay_url": url_for("outputs_file", filename=os.path.basename(heatmap_path)),
                 "uploaded_url": url_for("uploads_file", filename=filename),
                 "risk": risk,
-                "decision": decision,
-                "recommendation": recommendation,
+                "scan_done": True,
             })
         except Exception as e:
             flash(f"Inference error: {e}")
             return redirect(url_for("scanner"))
+            
 
     return render_template("scanner.html", **context)
 
 
 @app.route("/")
 def index():
+    # session.clear()  # clears history + last result
     return render_template("index.html")
 
 
 @app.route("/dashboard")
 def dashboard():
+    if "initialized" not in session:
+        session["initialized"] = True
     data = load_data()
     patients = data.get("patients", {})
 
     patient_summaries = []
     history = []
+
     for patient_name, scans in patients.items():
-        if not isinstance(scans, list) or not scans:
+        if not scans:
             continue
-        latest_scan = scans[-1]
+
+        latest = scans[-1]
+
         patient_summaries.append({
             "name": patient_name,
-            "latest_result": latest_scan.get("result") or latest_scan.get("prediction") or "N/A",
-            "latest_severity": latest_scan.get("severity") or "N/A",
-            "latest_confidence": latest_scan.get("confidence"),
             "scan_count": len(scans),
-            "latest_timestamp": latest_scan.get("date") or latest_scan.get("timestamp") or "Recently",
+            "latest_timestamp": latest.get("date"),  # keep raw for sorting
+            "display_time": format_datetime(latest.get("date"))
         })
+
+        # ✅ THIS MUST BE INSIDE LOOP
         for scan in scans:
             history.append({
                 "patient_name": patient_name,
-                "prediction": scan.get("result") or scan.get("prediction") or "N/A",
+                "prediction": scan.get("result"),
                 "confidence": scan.get("confidence"),
                 "severity": scan.get("severity"),
                 "risk": scan.get("risk"),
-                "timestamp": scan.get("date") or scan.get("timestamp") or "Recently",
+                "timestamp": format_datetime(scan.get("date"))
             })
 
-    history.sort(key=lambda s: s.get("timestamp") or "", reverse=True)
-    patient_summaries.sort(key=lambda p: p.get("latest_timestamp") or "", reverse=True)
+     # ✅ OUTSIDE LOOP
+    history.sort(key=lambda x: x["timestamp"], reverse=True)
+    patient_summaries.sort(key=lambda x: x["latest_timestamp"], reverse=True)
+    total_scans = len(history)
 
-    if history:
-        latest = history[0]
-        result = {
-            "prediction": latest.get("prediction"),
-            "confidence": latest.get("confidence"),
-            "severity": latest.get("severity"),
-            "risk": latest.get("risk"),
-        }
-    else:
-        result = session.get("last_result", None)
+    # 🔍 Search
+    search_query = request.args.get("search", "").lower()
+
+    # 🎯 Filter
+    filter_risk = request.args.get("risk", "all")
+
+    # 🔽 Sort
+    sort_by = request.args.get("sort", "latest")
+
+    filtered_history = history
+
+    # Apply search
+    if search_query:
+        filtered_history = [
+            h for h in filtered_history
+            if search_query in h.get("prediction", "").lower()
+        ]
+
+    # Apply filter
+    if filter_risk != "all":
+        filtered_history = [
+            h for h in filtered_history
+            if h.get("risk") == filter_risk
+        ]
+
+    # Apply sorting
+    if sort_by == "oldest":
+        filtered_history = list(reversed(filtered_history))
+    elif sort_by == "confidence":
+        filtered_history = sorted(filtered_history, key=lambda x: x.get("confidence", 0), reverse=True)
+
+    # 📄 Pagination
+    page = request.args.get("page", 1, type=int)
+    per_page = 3
+
+    total = len(filtered_history)
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    paginated_history = filtered_history[start:end]
+
+    total_pages = (total + per_page - 1) // per_page
+    # result = session.get("last_result", {}) or {}   
+    # result = session.get("last_result") or {}
 
     # Chart files
     accuracy = "model_accuracy_bar_chart.png"
     cm = "normalized_cm_votingclassifier.png"
     radar = "model_radar_chart.png"
+    f1 = "normalized_cm_votingclassifier.png"
 
     accuracy_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, accuracy))
     cm_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, cm))
+    f1_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, f1))
     radar_exists = os.path.exists(os.path.join(config.OUTPUTS_DIR, radar))
+
+    healthy_count = sum(
+        1 for h in history 
+        if h.get("severity") in ["None", "Healthy"]
+        or "No DR" in h.get("prediction", "")
+    )
+
+    high_risk_count = sum(
+        1 for h in history 
+        if h.get("risk") == "High"
+    )
+
+    moderate_count = sum(
+    1 for h in history 
+    if h.get("risk") == "Moderate"
+    )
+
+    total_scans = len(history)
+
+    if total_scans == 0:
+        healthy_percent = moderate_percent = high_percent = 0
+    else:
+        healthy_percent = round((healthy_count / total_scans) * 100, 1)
+        moderate_percent = round((moderate_count / total_scans) * 100, 1)
+        high_percent = round((high_risk_count / total_scans) * 100, 1)   
+
+    if history:
+        latest = history[0]   # already sorted
+    else:
+        latest = {}
 
     return render_template(
         "dashboard.html",
-
-        # 🔥 Dynamic scan data
-        prediction=result.get("prediction") if result else None,
-        confidence=result.get("confidence") if result else None,
-        severity=result.get("severity") if result else None,
-        risk=result.get("risk") if result else None,
-
-        history=history if history else session.get("scan_history", []),
         patient_summaries=patient_summaries,
-
-        # 📊 Charts
+        prediction=latest.get("prediction"),
+        confidence=latest.get("confidence"),
+        severity=latest.get("severity"),
+        risk=latest.get("risk"),
+        history=history,
+        total_scans=total_scans,
+        search_query=search_query,
+        filter_risk=filter_risk,
+        sort_by=sort_by,
+        page=page,
+        total_pages=total_pages,
+        healthy_count=healthy_count,
+        moderate_count=moderate_count,
+        high_risk_count=high_risk_count,
+        healthy_percent=healthy_percent,
+        moderate_percent=moderate_percent,
+        high_percent=high_percent,
         accuracy_url=url_for("outputs_file", filename=accuracy) if accuracy_exists else None,
         cm_url=url_for("outputs_file", filename=cm) if cm_exists else None,
         radar_url=url_for("outputs_file", filename=radar) if radar_exists else None,
-    )
+        f1_url=url_for("outputs_file", filename=f1) if f1_exists else None,
+        )
 
-
-@app.route("/download_report/<path:patient_name>")
+@app.route("/download_report/<patient_name>")
 def download_report(patient_name):
     data = load_data()
-    scans = data.get("patients", {}).get(patient_name, [])
-    if not scans:
-        flash("No report data found for this patient.")
+    patient_scans = data.get("patients", {}).get(patient_name, [])
+
+    if not patient_scans:
+        flash("No report found")
         return redirect(url_for("dashboard"))
 
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
-    _, height = A4
 
+    width, height = A4
     y = height - 40
+
+    # Title
     pdf.setFont("Helvetica-Bold", 16)
     pdf.drawString(40, y, "RetinaScan AI - Patient Report")
-    y -= 28
 
+    y -= 25
     pdf.setFont("Helvetica", 11)
     pdf.drawString(40, y, f"Patient Name: {patient_name}")
-    y -= 18
-    pdf.drawString(40, y, f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
-    y -= 28
 
-    latest = scans[-1]
+    y -= 15
+    pdf.drawString(40, y, f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+
+    # Latest scan
+    latest = patient_scans[-1] if patient_scans else {}
+
+    y -= 30
     pdf.setFont("Helvetica-Bold", 12)
     pdf.drawString(40, y, "Latest Scan")
-    y -= 18
-    pdf.setFont("Helvetica", 11)
-    pdf.drawString(40, y, f"Date: {latest.get('date', 'N/A')}")
-    y -= 16
-    pdf.drawString(40, y, f"Result: {latest.get('result', 'N/A')}")
-    y -= 16
-    pdf.drawString(40, y, f"Severity: {latest.get('severity', 'N/A')}")
-    y -= 16
-    pdf.drawString(40, y, f"Confidence: {latest.get('confidence', 'N/A')}%")
-    y -= 24
 
-    image_name = latest.get("image_path")
-    if image_name:
-        image_file = os.path.join(config.UPLOADS_DIR, os.path.basename(image_name))
-        if os.path.exists(image_file):
+    y -= 20
+    pdf.setFont("Helvetica", 11)
+    pdf.drawString(40, y, f"Date: {format_datetime(latest.get('date'))}")
+    y -= 15
+    pdf.drawString(40, y, f"Result: {latest.get('result')}")
+    y -= 15
+    pdf.drawString(40, y, f"Severity: {latest.get('severity')}")
+    y -= 15
+    pdf.drawString(40, y, f"Confidence: {latest.get('confidence')}%")
+
+    # 🔥 IMAGES SECTION
+    y -= 30
+    pdf.drawString(40, y - 155, "Original")
+    pdf.drawString(220, y - 155, "Segmented")
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(40, y, "Retinal Images")
+
+    y -= 20
+
+    # Original Image
+    image_path = latest.get("image_path")
+    if image_path:
+        img_file = os.path.join(config.UPLOADS_DIR, image_path)
+        if os.path.exists(img_file):
             try:
-                pdf.drawImage(ImageReader(image_file), 40, y - 180, width=170, height=170, preserveAspectRatio=True, mask='auto')
-                y -= 190
-            except Exception:
+                pdf.drawImage(ImageReader(img_file), 40, y - 150, width=150, height=150)
+            except:
                 pass
 
+    # Segmented Image
+    overlay_path = latest.get("overlay_path")
+    if overlay_path:
+        overlay_file = os.path.join(config.OUTPUTS_DIR, overlay_path)
+        if os.path.exists(overlay_file):
+            try:
+                pdf.drawImage(ImageReader(overlay_file), 220, y - 150, width=150, height=150)
+            except:
+                pass
+
+    y -= 170
+
+    # Scan History
     pdf.setFont("Helvetica-Bold", 12)
     pdf.drawString(40, y, "Scan History")
-    y -= 18
+
+    y -= 20
     pdf.setFont("Helvetica", 10)
 
-    for idx, scan in enumerate(reversed(scans), start=1):
-        line = (
-            f"{idx}. {scan.get('date', 'N/A')} | Result: {scan.get('result', 'N/A')} | "
-            f"Severity: {scan.get('severity', 'N/A')} | Confidence: {scan.get('confidence', 'N/A')}%"
-        )
+    for i, scan in enumerate(reversed(patient_scans), 1):
+        line = f"{i}. {format_datetime(scan.get('date'))} | Result: {scan.get('result')} | Severity: {scan.get('severity')} | Confidence: {scan.get('confidence')}%"
         pdf.drawString(40, y, line[:120])
         y -= 14
+
         if y < 60:
             pdf.showPage()
             y = height - 40
@@ -326,12 +444,12 @@ def download_report(patient_name):
 
     pdf.save()
     buffer.seek(0)
-    safe_name = secure_filename(patient_name) or "patient"
+
     return send_file(
         buffer,
-        mimetype="application/pdf",
         as_attachment=True,
-        download_name=f"{safe_name}_report.pdf",
+        download_name=f"{patient_name}_report.pdf",
+        mimetype="application/pdf"
     )
 
 @app.route("/outputs/<path:filename>")
